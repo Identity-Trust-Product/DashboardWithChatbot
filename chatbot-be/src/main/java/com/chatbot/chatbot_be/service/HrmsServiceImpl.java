@@ -89,6 +89,8 @@ public class HrmsServiceImpl implements HrmsService {
     @Override
     public List<Map<String, Object>> getSchemaStructure(String schemaName) {
         log.info("getSchemaStructure: {}", schemaName);
-        return repo.getSchemaStructure(schemaName);
+        List<Map<String, Object>> schemaStructure = repo.getSchemaStructure(schemaName);
+        log.info("schemaStructure: {}", schemaStructure);
+        return schemaStructure;
     }
 }

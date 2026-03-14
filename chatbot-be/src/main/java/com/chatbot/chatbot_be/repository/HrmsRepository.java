@@ -375,20 +375,54 @@ public class HrmsRepository {
     }
 
     /** Returns schema metadata for query builder */
-    public List<Map<String, Object>> getSchemaStructure(String schemaName) {
-        return jdbc.queryForList(
-            "SELECT c.table_name, c.column_name, c.data_type, c.is_nullable, " +
-            "       tc.constraint_type, ccu.table_name AS foreign_table " +
-            "FROM information_schema.columns c " +
-            "LEFT JOIN information_schema.key_column_usage kcu " +
-            "     ON c.table_name = kcu.table_name AND c.column_name = kcu.column_name " +
-            "     AND kcu.table_schema = ? " +
-            "LEFT JOIN information_schema.table_constraints tc " +
-            "     ON kcu.constraint_name = tc.constraint_name AND tc.table_schema = ? " +
-            "LEFT JOIN information_schema.constraint_column_usage ccu " +
-            "     ON tc.constraint_name = ccu.constraint_name AND tc.constraint_type = 'FOREIGN KEY' " +
-            "WHERE c.table_schema = ? " +
-            "ORDER BY c.table_name, c.ordinal_position",
-            schemaName, schemaName, schemaName);
-    }
+   public List<Map<String, Object>> getSchemaStructure(String schemaName) {
+
+    String sql =
+        "SELECT nsp.nspname AS schema_name, " +
+        "cls.relname AS table_name, " +
+        "pgd_table.description AS table_description, " +
+        "att.attname AS column_name, " +
+        "format_type(att.atttypid, att.atttypmod) AS data_type, " +
+        "pgd_column.description AS column_description, " +
+        "CASE con.contype " +
+        " WHEN 'p' THEN 'PRIMARY KEY' " +
+        " WHEN 'f' THEN 'FOREIGN KEY' " +
+        " WHEN 'u' THEN 'UNIQUE' " +
+        " WHEN 'c' THEN 'CHECK' " +
+        " ELSE 'No Constraint' " +
+        " END AS column_constraint, " +
+        "fnsp.nspname AS reference_schema, " +
+        "fcls.relname AS reference_table, " +
+        "fatt.attname AS reference_column " +
+        "FROM pg_class cls " +
+        "JOIN pg_namespace nsp " +
+        "ON nsp.oid = cls.relnamespace " +
+        "AND cls.relkind = 'r' " +
+        "JOIN pg_attribute att " +
+        "ON att.attrelid = cls.oid " +
+        "AND att.attnum > 0 " +
+        "AND NOT att.attisdropped " +
+        "LEFT JOIN pg_description pgd_table " +
+        "ON pgd_table.objoid = cls.oid " +
+        "AND pgd_table.objsubid = 0 " +
+        "LEFT JOIN pg_description pgd_column " +
+        "ON pgd_column.objoid = cls.oid " +
+        "AND pgd_column.objsubid = att.attnum " +
+        "LEFT JOIN pg_constraint con " +
+        "ON con.conrelid = cls.oid " +
+        "AND att.attnum = ANY (con.conkey) " +
+        "LEFT JOIN pg_class fcls " +
+        "ON fcls.oid = con.confrelid " +
+        "AND con.contype = 'f' " +
+        "LEFT JOIN pg_namespace fnsp " +
+        "ON fnsp.oid = fcls.relnamespace " +
+        "LEFT JOIN pg_attribute fatt " +
+        "ON fatt.attrelid = con.confrelid " +
+        "AND fatt.attnum = ANY (con.confkey) " +
+        "AND con.contype = 'f' " +
+        "WHERE nsp.nspname = ? " +
+        "ORDER BY schema_name, table_name, att.attnum";
+
+    return jdbc.queryForList(sql, schemaName);
+}
 }
