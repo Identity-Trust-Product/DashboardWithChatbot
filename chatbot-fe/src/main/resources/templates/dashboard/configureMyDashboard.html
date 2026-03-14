@@ -296,8 +296,10 @@
     // ── Server-side data ──────────────────────────────────────────────────────
     var dashboardConfigs   = /*[[${dashboardConfigs}]]*/ [];
     var userId             = /*[[${userId}]]*/ '';
-    var savedConfigRaw     = /*[[${savedDashboardConfig}]]*/ null;
-
+    var savedConfigRaw = /*[[${savedDashboardConfig}]]*/ '{}';
+    console.log("savedConfigRaw :{}",savedConfigRaw)
+    var savedConfig = JSON.parse(savedConfigRaw);
+    console.log("savedConfig :{}",savedConfig)
     // ── State ─────────────────────────────────────────────────────────────────
     var dashboardSelections = [];   // [{module:"...", metrics:[{key,type,value,url},...]}]
     var activeModuleName    = null;
@@ -335,14 +337,15 @@
     }
 
     // ── Init: restore saved config ────────────────────────────────────────────
-    (function initSaved() {
-        if (!savedConfigRaw) return;
-        try {
-            var saved = JSON.parse(savedConfigRaw);
-            dashboardSelections = JSON.parse(JSON.stringify(saved.selections || []));
-            renderPreview();
-        } catch(e) { console.warn('savedConfig parse error:', e); }
-    })();
+   (function initSaved(){
+
+    if(!savedConfig || !savedConfig.selections) return;
+
+    dashboardSelections = savedConfig.selections;
+
+    renderPreview();
+
+})();
 
     // ── Module dropdown change → open popup ───────────────────────────────────
     moduleSelect.addEventListener('change', function() {
@@ -375,7 +378,10 @@
             var chk = document.createElement('input');
             chk.type = 'checkbox';
             chk.id   = 'chk-' + idx;
-            chk.checked = !!slot.metrics.find(function(m){ return m.key === metric.key; });
+           // chk.checked = !!slot.metrics.find(function(m){ return m.key === metric.key; });
+           chk.checked = slot.metrics.some(function(m){
+    return m.key === metric.key;
+});
             if (chk.checked) li.classList.add('checked');
 
             chk.addEventListener('change', function() {

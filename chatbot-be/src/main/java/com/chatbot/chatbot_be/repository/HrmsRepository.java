@@ -38,6 +38,7 @@ public class HrmsRepository {
     }
 
     public int countAllEmployees() {
+        log.info("count of employees");
         return jdbc.queryForObject(
             "SELECT COUNT(*) FROM hrms.employees", Integer.class);
     }

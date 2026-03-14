@@ -81,9 +81,21 @@ public class HrmsServiceImpl implements HrmsService {
 
     // ── Dynamic query ─────────────────────────────────────────────────────────
     @Override
-    public List<Map<String, Object>> runDynamicQuery(String sql) {
-        log.info("Running dynamic query: {}", sql);
-        return repo.runDynamicQuery(sql);
+    public List<Map<String, Object>> runDynamicQuery(String inputSql) {
+
+    String[] parts = inputSql.split("_schema_name_");
+
+    if (parts.length < 2) {
+        throw new IllegalArgumentException("Invalid query format");
+    }
+
+    String schema = parts[0];
+    String sql    = parts[1];
+
+    log.info("Schema: {}", schema);
+    log.info("Running dynamic query: {}", sql);
+
+    return repo.runDynamicQuery(sql);
     }
 
     @Override

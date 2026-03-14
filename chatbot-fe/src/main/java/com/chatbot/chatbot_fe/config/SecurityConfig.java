@@ -39,6 +39,9 @@ public class SecurityConfig {
                 .clearAuthentication(true)
                 .permitAll()
             )
+            .headers(headers -> headers
+            .frameOptions(frame -> frame.sameOrigin())
+            )
             .csrf(csrf -> csrf.disable()); // keep disabled for REST endpoints
 
         return http.build();

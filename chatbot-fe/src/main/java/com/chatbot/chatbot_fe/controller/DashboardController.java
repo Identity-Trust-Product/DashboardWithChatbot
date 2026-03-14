@@ -26,6 +26,7 @@ import java.text.SimpleDateFormat;
 import java.time.*;
 import java.util.*;
 import java.util.stream.*;
+import java.util.function.Supplier;
 
 /**
  * ====================================================================
@@ -165,47 +166,56 @@ public class DashboardController {
         Map<String, Object> userConfig = dashboard.getUserConfigAsMap(userId);
         log.info("userConfig : {}", userConfig);
         try {
-            List<Map<String, Object>> savedMetrics = fetchDynamicUrl(str(userConfig, colDashboardData));
+           // List<Map<String, Object>> savedMetrics = fetchDynamicUrl(str(userConfig, colDashboardData));
+           Map<String,Object> dashboardMap =(Map<String,Object>) userConfig.get("dashboard_data");
+
+        String json = "";
+
+        if(dashboardMap != null){
+            json = (String) dashboardMap.get("value");
+        }
+
+        List<Map<String, Object>> savedMetrics =fetchDynamicUrl(json);
             metrics.addAll(savedMetrics);
         } catch (Exception ex) {
-            log.error("Error loading saved config: {}", ex.getMessage());
+            log.error("Error loading saved config: {}", ex);
         }
 
         // ── 2. COUNT widgets — instant KPIs ───────────────────────────────────
-        metrics.add(metric("Total Employees",     "count", proxy.countAllEmployees(),       "/emp/count/all"));
-        metrics.add(metric("Present Today",       "count", proxy.countPresentToday(),       "/attendance/present-today/count"));
-        metrics.add(metric("On Leave Today",      "count", proxy.countOnLeaveToday(),       "/leaves/on-leave-today/count"));
-        metrics.add(metric("Absent Today",        "count", proxy.countAbsentToday(),        "/attendance/absent-today/count"));
-        metrics.add(metric("Pending Leave Requests","count",proxy.countPendingLeaves(),     "/leaves/pending/count"));
-        metrics.add(metric("Active Projects",     "count", proxy.countActiveProjects(),     "/projects/active/count"));
-        metrics.add(metric("Departments",         "count", proxy.countDepartments(),        "/departments/count"));
-        metrics.add(metric("Pending Payroll",     "count", proxy.countPendingPayroll(),     "/payroll/pending/count"));
+        // metrics.add(metric("Total Employees",     "count", proxy.countAllEmployees(),       "/emp/count/all"));
+        // metrics.add(metric("Present Today",       "count", proxy.countPresentToday(),       "/attendance/present-today/count"));
+        // metrics.add(metric("On Leave Today",      "count", proxy.countOnLeaveToday(),       "/leaves/on-leave-today/count"));
+        // metrics.add(metric("Absent Today",        "count", proxy.countAbsentToday(),        "/attendance/absent-today/count"));
+        // metrics.add(metric("Pending Leave Requests","count",proxy.countPendingLeaves(),     "/leaves/pending/count"));
+        // metrics.add(metric("Active Projects",     "count", proxy.countActiveProjects(),     "/projects/active/count"));
+        // metrics.add(metric("Departments",         "count", proxy.countDepartments(),        "/departments/count"));
+        // metrics.add(metric("Pending Payroll",     "count", proxy.countPendingPayroll(),     "/payroll/pending/count"));
 
         // ── 3. PERCENTAGE widgets ─────────────────────────────────────────────
-        metrics.add(metric("Attendance Rate",         "percentage", proxy.attendanceRateToday(),  "/attendance/rate-today"));
-        metrics.add(metric("Leave Approval Rate",     "percentage", proxy.leaveApprovalRate(),    "/leaves/approval-rate"));
-        metrics.add(metric("Payroll Processed",       "percentage", proxy.payrollProcessedRate(), "/payroll/processed-rate"));
-        metrics.add(metric("Avg Performance Score",   "percentage", proxy.avgPerformancePercent(),"/performance/avg-percent"));
+        // metrics.add(metric("Attendance Rate",         "percentage", proxy.attendanceRateToday(),  "/attendance/rate-today"));
+        // metrics.add(metric("Leave Approval Rate",     "percentage", proxy.leaveApprovalRate(),    "/leaves/approval-rate"));
+        // metrics.add(metric("Payroll Processed",       "percentage", proxy.payrollProcessedRate(), "/payroll/processed-rate"));
+        // metrics.add(metric("Avg Performance Score",   "percentage", proxy.avgPerformancePercent(),"/performance/avg-percent"));
 
         // ── 4. SPEEDOMETER widgets ────────────────────────────────────────────
-        metrics.add(metric("Avg Performance Rating",  "speedometer", proxy.avgPerformanceRating(), "/performance/avg-rating"));
-        metrics.add(metric("Avg Daily Working Hours", "speedometer", proxy.avgWorkingHours(),       "/attendance/avg-hours"));
+        // metrics.add(metric("Avg Performance Rating",  "speedometer", proxy.avgPerformanceRating(), "/performance/avg-rating"));
+        // metrics.add(metric("Avg Daily Working Hours", "speedometer", proxy.avgWorkingHours(),       "/attendance/avg-hours"));
 
         // ── 5. GRAPH widgets ──────────────────────────────────────────────────
-        metrics.add(metric("Employees by Department",    "graph", proxy.employeesByDepartment(),     "/employees/by-department"));
-        metrics.add(metric("Employees by Type",          "graph", proxy.employeesByEmploymentType(), "/employees/by-employment-type"));
-        metrics.add(metric("Monthly Attendance Trend",   "graph", proxy.monthlyAttendanceTrend(),    "/attendance/monthly-trend"));
-        metrics.add(metric("Monthly Payroll Cost",       "graph", proxy.monthlySalaryCost(),         "/payroll/monthly-cost"));
-        metrics.add(metric("Leaves by Type",             "graph", proxy.leavesByType(),              "/leaves/by-type"));
-        metrics.add(metric("Employee Joining Trend",     "graph", proxy.joiningTrendByYear(),        "/employees/joining-trend"));
+        // metrics.add(metric("Employees by Department",    "graph", proxy.employeesByDepartment(),     "/employees/by-department"));
+        // metrics.add(metric("Employees by Type",          "graph", proxy.employeesByEmploymentType(), "/employees/by-employment-type"));
+        // metrics.add(metric("Monthly Attendance Trend",   "graph", proxy.monthlyAttendanceTrend(),    "/attendance/monthly-trend"));
+        // metrics.add(metric("Monthly Payroll Cost",       "graph", proxy.monthlySalaryCost(),         "/payroll/monthly-cost"));
+        // metrics.add(metric("Leaves by Type",             "graph", proxy.leavesByType(),              "/leaves/by-type"));
+        // metrics.add(metric("Employee Joining Trend",     "graph", proxy.joiningTrendByYear(),        "/employees/joining-trend"));
 
         // ── 6. LIST widgets ───────────────────────────────────────────────────
-        metrics.add(metric("Employee Directory",          "list", proxy.getAllEmployeesAsMap(),   "/get/employee-list"));
-        metrics.add(metric("Pending Leave Requests",      "list", proxy.pendingLeavesList(),      "/leaves/pending/list"));
-        metrics.add(metric("Today Attendance",            "list", proxy.attendanceToday(),        "/attendance/today"));
-        metrics.add(metric("Recent Payroll",              "list", proxy.recentPayroll(),          "/payroll/recent"));
-        metrics.add(metric("Active Projects",             "list", proxy.activeProjectsList(),     "/projects/active/list"));
-        metrics.add(metric("Performance Reviews",         "list", proxy.performanceList(),        "/performance/list"));
+        // metrics.add(metric("Employee Directory",          "list", proxy.getAllEmployeesAsMap(),   "/get/employee-list"));
+        // metrics.add(metric("Pending Leave Requests",      "list", proxy.pendingLeavesList(),      "/leaves/pending/list"));
+        // metrics.add(metric("Today Attendance",            "list", proxy.attendanceToday(),        "/attendance/today"));
+        // metrics.add(metric("Recent Payroll",              "list", proxy.recentPayroll(),          "/payroll/recent"));
+        // metrics.add(metric("Active Projects",             "list", proxy.activeProjectsList(),     "/projects/active/list"));
+        // metrics.add(metric("Performance Reviews",         "list", proxy.performanceList(),        "/performance/list"));
 
         // ── 7. TODO list ──────────────────────────────────────────────────────
         try {
@@ -244,71 +254,177 @@ public class DashboardController {
         return "dashboard/sampleDashboard";
     }
 
+    private Map<String, Supplier<Object>> metricMethodMap() {
+
+    Map<String, Supplier<Object>> map = new HashMap<>();
+
+    map.put("/emp/count/all", proxy::countAllEmployees);
+    map.put("/attendance/present-today/count", proxy::countPresentToday);
+    map.put("/leaves/on-leave-today/count", proxy::countOnLeaveToday);
+    map.put("/attendance/absent-today/count", proxy::countAbsentToday);
+    map.put("/leaves/pending/count", proxy::countPendingLeaves);
+    map.put("/projects/active/count", proxy::countActiveProjects);
+    map.put("/departments/count", proxy::countDepartments);
+    map.put("/payroll/pending/count", proxy::countPendingPayroll);
+    map.put("/payroll/pending/count", proxy::countPendingPayroll);
+    map.put("/employees/by-department", proxy::employeesByDepartment);
+    map.put("/get/employee-list", proxy::getAllEmployeesAsMap);
+
+    return map;
+}
 
     // =========================================================================
     //  fetchDynamicUrl  —  same as original
     // =========================================================================
-    @GetMapping("/dashboard-test")
+    //@GetMapping("/dashboard-test")
+    // public List<Map<String, Object>> fetchDynamicUrl(String response) throws Exception {
+    //     if (response == null || response.isBlank()) return Collections.emptyList();
+    //     JsonNode root = MAPPER.readTree(response);
+    //     List<Map<String, Object>> dashboardData = new ArrayList<>();
+    //     for (JsonNode sel : root.path("selections")) {
+    //         Map<String, Object> moduleMap = new LinkedHashMap<>();
+    //         moduleMap.put("module", sel.path("module").asText());
+    //         List<Map<String, Object>> metricsList = new ArrayList<>();
+    //         for (JsonNode mn : sel.path("metrics")) {
+    //             Map<String, Object> m = new LinkedHashMap<>();
+    //             m.put("key",   mn.path("key").asText());
+    //             m.put("type",  mn.path("type").asText());
+    //             m.put("value", mn.path("value").isNull() ? null : mn.path("value").asText());
+    //             m.put("url",   mn.path("url").asText());
+    //             metricsList.add(m);
+    //         }
+    //         moduleMap.put("metrics", metricsList);
+    //         dashboardData.add(moduleMap);
+    //     }
+    //     if (dashboardData.isEmpty()) return Collections.emptyList();
+    //     dashboardInvoker.populateDashboardValues(dashboardData);
+    //     @SuppressWarnings("unchecked")
+    //     List<Map<String, Object>> first = (List<Map<String, Object>>) dashboardData.get(0).get("metrics");
+    //     return first.stream()
+    //             .map(m -> metric((String) m.get("key"), (String) m.get("type"), m.get("value"), (String) m.get("url")))
+    //             .collect(Collectors.toList());
+    // }
+
+     @GetMapping("/dashboard-test")
     public List<Map<String, Object>> fetchDynamicUrl(String response) throws Exception {
-        if (response == null || response.isBlank()) return Collections.emptyList();
-        JsonNode root = MAPPER.readTree(response);
-        List<Map<String, Object>> dashboardData = new ArrayList<>();
-        for (JsonNode sel : root.path("selections")) {
-            Map<String, Object> moduleMap = new LinkedHashMap<>();
-            moduleMap.put("module", sel.path("module").asText());
-            List<Map<String, Object>> metricsList = new ArrayList<>();
-            for (JsonNode mn : sel.path("metrics")) {
-                Map<String, Object> m = new LinkedHashMap<>();
-                m.put("key",   mn.path("key").asText());
-                m.put("type",  mn.path("type").asText());
-                m.put("value", mn.path("value").isNull() ? null : mn.path("value").asText());
-                m.put("url",   mn.path("url").asText());
-                metricsList.add(m);
+
+    if (response == null || response.isBlank())
+        return Collections.emptyList();
+
+    Map<String, Supplier<Object>> methodMap = metricMethodMap();
+
+    JsonNode root = MAPPER.readTree(response);
+    List<Map<String, Object>> result = new ArrayList<>();
+
+    for (JsonNode sel : root.path("selections")) {
+
+        for (JsonNode mn : sel.path("metrics")) {
+
+            String key  = mn.path("key").asText();
+            String type = mn.path("type").asText();
+            String url  = mn.path("url").asText();
+
+            Object value = null;
+
+            Supplier<Object> method = methodMap.get(url);
+
+            if (method != null) {
+                value = method.get();   // <-- proxy method called
             }
-            moduleMap.put("metrics", metricsList);
-            dashboardData.add(moduleMap);
+
+            result.add(metric(key, type, value, url));
         }
-        if (dashboardData.isEmpty()) return Collections.emptyList();
-        dashboardInvoker.populateDashboardValues(dashboardData);
-        @SuppressWarnings("unchecked")
-        List<Map<String, Object>> first = (List<Map<String, Object>>) dashboardData.get(0).get("metrics");
-        return first.stream()
-                .map(m -> metric((String) m.get("key"), (String) m.get("type"), m.get("value"), (String) m.get("url")))
-                .collect(Collectors.toList());
     }
+
+    return result;
+}
 
 
     // =========================================================================
     //  GET /configure-my-dashboard
     // =========================================================================
-    @GetMapping("/configure-my-dashboard")
-    public String configureMyDashboard(Model model) {
+    // @GetMapping("/configure-my-dashboard")
+    // public String configureMyDashboard(Model model) {
 
-        String userId = userInfo.getUser();
-        Map<String, Object> userConfig = dashboard.getUserConfigAsMap(userId);
-        List<Map<String, Object>> moduleList = dashboard.getModuleListAsMap();
-        List<Map<String, Object>> dashboardConfigs = new ArrayList<>();
+    //     String userId = userInfo.getUser();
+    //     Map<String, Object> userConfig = dashboard.getUserConfigAsMap(userId);
+    //     List<Map<String, Object>> moduleList = dashboard.getModuleListAsMap();
+    //     List<Map<String, Object>> dashboardConfigs = new ArrayList<>();
 
-        for (Map<String, Object> module : moduleList) {
-            String moduleName = str(module, colModuleName);
-            List<Map<String, Object>> metrics = getModuleMetrics(moduleName);
-            if (!metrics.isEmpty()) {
-                Map<String, Object> cfg = new LinkedHashMap<>();
-                cfg.put("userId",  userId);
-                cfg.put("module",  moduleName);
-                cfg.put("metrics", metrics);
-                dashboardConfigs.add(cfg);
-            }
+    //     for (Map<String, Object> module : moduleList) {
+    //         String moduleName = str(module, colModuleName);
+    //         List<Map<String, Object>> metrics = getModuleMetrics(moduleName);
+    //         if (!metrics.isEmpty()) {
+    //             Map<String, Object> cfg = new LinkedHashMap<>();
+    //             cfg.put("userId",  userId);
+    //             cfg.put("module",  moduleName);
+    //             cfg.put("metrics", metrics);
+    //             dashboardConfigs.add(cfg);
+    //         }
+    //     }
+
+    //     log.info("dashboardConfigs: {}", dashboardConfigs);
+    //     model.addAttribute("savedDashboardConfig", str(userConfig, colDashboardData));
+    //     model.addAttribute("dashboardConfigs",     dashboardConfigs);
+    //     model.addAttribute("userId",               userId);
+    //     model.addAttribute("modulelist",           moduleList);
+
+    //     return "dashboard/configureMyDashboard";
+    // }
+
+   @GetMapping("/configure-my-dashboard")
+public String configureMyDashboard(Model model) {
+
+    String userId = userInfo.getUser();
+    Map<String, Object> userConfig = dashboard.getUserConfigAsMap(userId);
+
+    List<Map<String, Object>> moduleList = dashboard.getModuleListAsMap();
+    List<Map<String, Object>> dashboardConfigs = new ArrayList<>();
+
+    for (Map<String, Object> module : moduleList) {
+        String moduleName = str(module, colModuleName);
+        List<Map<String, Object>> metrics = getModuleMetrics(moduleName);
+
+        if (!metrics.isEmpty()) {
+            Map<String, Object> cfg = new LinkedHashMap<>();
+            cfg.put("userId", userId);
+            cfg.put("module", moduleName);
+            cfg.put("metrics", metrics);
+            dashboardConfigs.add(cfg);
         }
-
-        log.info("dashboardConfigs: {}", dashboardConfigs);
-        model.addAttribute("savedDashboardConfig", str(userConfig, colDashboardData));
-        model.addAttribute("dashboardConfigs",     dashboardConfigs);
-        model.addAttribute("userId",               userId);
-        model.addAttribute("modulelist",           moduleList);
-
-        return "dashboard/configureMyDashboard";
     }
+
+    Object raw = userConfig.get(colDashboardData);
+
+    String savedJson = "{}";
+
+    if (raw != null) {
+
+        String rawStr = raw.toString();
+
+        // extract JSON between "value=" and ", null"
+        if (rawStr.contains("value=")) {
+
+            int start = rawStr.indexOf("value=") + 6;
+            int end = rawStr.lastIndexOf(", null");
+
+            savedJson = rawStr.substring(start, end);
+
+        } else {
+            savedJson = rawStr;
+        }
+    }
+
+    log.info("Final JSON sent to UI: {}", savedJson);
+
+    model.addAttribute("savedDashboardConfig", savedJson);
+    model.addAttribute("dashboardConfigs", dashboardConfigs);
+    model.addAttribute("userId", userId);
+    model.addAttribute("modulelist", moduleList);
+
+    return "dashboard/configureMyDashboard";
+}
+
 
     /** Returns available metrics for each module — add new modules here */
     private List<Map<String, Object>> getModuleMetrics(String moduleName) {

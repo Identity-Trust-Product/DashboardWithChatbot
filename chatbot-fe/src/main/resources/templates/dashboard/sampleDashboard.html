@@ -155,24 +155,39 @@
             padding-bottom: 8px;
             border-bottom: 1px solid var(--border-color);
         }
-        .graph-body { display: flex; align-items: flex-start; gap: 12px; }
-        .graph-ctrl-col { display: flex; flex-direction: column; gap: 6px; padding-top: 4px; }
-        .gc-btn {
-            width: 30px; height: 30px;
-            border: none;
-            border-radius: 8px;
-            color: white;
-            font-size: 14px;
-            font-weight: 800;
-            cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
-            transition: transform 0.15s;
-        }
-        .gc-btn:hover { transform: scale(1.12); }
-        .gc-zin  { background: var(--accent-green); }
-        .gc-zout { background: var(--accent-red); }
-        .gc-rst  { background: var(--accent-yellow); color: #333; }
-        .gc-dl   { background: var(--primary); }
+        .graph-body{
+    position:relative;
+    height:240px;
+}
+        .graph-toolbar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:6px 8px;
+    border-bottom:1px solid #eee;
+    margin-bottom:6px;
+}
+       .chart-controls{
+    display:flex;
+    gap:6px;
+}
+
+.gc-btn{
+    width:28px;
+    height:28px;
+    border:none;
+    background:#f1f3f8;
+    border-radius:6px;
+    cursor:pointer;
+    font-size:14px;
+    transition:all .2s;
+}
+
+.gc-btn:hover{
+    background:#4e73df;
+    color:white;
+}
+
         .chart-type-sel {
             position: absolute;
             top: 14px; right: 14px;
@@ -189,27 +204,43 @@
            LIST SECTION
         ====================================================== */
         #list-section {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 20px;
-            margin-bottom: 26px;
-        }
-        @media (max-width: 1100px) { #list-section { grid-template-columns: 1fr; } }
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    margin-bottom: 26px;
+
+    width: 100%;
+    overflow-x: auto;
+}
+        @media (max-width: 1100px) {
+    #list-section {
+        grid-template-columns: 1fr;
+    }
+}
 
         .list-card {
-            background: white;
-            border-radius: 16px;
-            padding: 20px;
-            box-shadow: var(--card-shadow);
-        }
+    background: white;
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: var(--card-shadow);
+
+    width: 100%;
+}
         .list-card-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 12px;
         }
-        .list-card-title { font-size: 15px; font-weight: 800; color: #1a1f36; margin: 0; }
-        .list-card table { width: 100%; border-collapse: collapse; }
+        .list-card table {
+    width: 100%;
+    border-collapse: collapse;
+}
+       .list-card table {
+    width: 100%;
+    min-width: 500px;
+    border-collapse: collapse;
+}
         .list-card thead th {
             background: linear-gradient(90deg, var(--primary), var(--primary-dark));
             color: white;
@@ -279,14 +310,16 @@
         .pg-btn:disabled { opacity: 0.35; cursor: not-allowed; }
         .pg-info { font-size: 12px; color: var(--text-muted); }
         .list-fullscreen-card {
-            position: fixed !important;
-            top: 0 !important; left: 0 !important;
-            width: 100vw !important;
-            height: 100vh !important;
-            z-index: 9998;
-            border-radius: 0 !important;
-            overflow: auto;
-        }
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    z-index: 9998;
+    border-radius: 0 !important;
+    overflow: auto;
+    padding: 30px;
+}
 
         /* ======================================================
            TODO PANEL (floating)
@@ -718,17 +751,36 @@
             z-index: 1100;
             display: none;
         }
+        
         #qb-panel {
             position: fixed;
-            top: 50%; left: 55%;
-            transform: translate(-50%, -50%);
-            width: 88%;
-            max-height: 88vh;
+    top: 50%; left: 55%;
+    transform: translate(-50%, -50%);
+    width: 88%;
+    height: 88vh;
             border-radius: 20px;
             z-index: 1110;
             display: none;
             overflow: hidden;
         }
+        .qb-left{
+    width:42%;
+    min-width:300px;
+    background:#f8f9fc;
+    border-right:1px solid var(--border-color);
+    overflow-y:auto;
+    overflow-x:hidden;
+    padding:18px;
+    height:100%;
+}
+.qb-right{
+    flex:1;
+    padding:18px;
+    overflow-y:auto;
+    overflow-x:hidden;
+    height:100%;
+    background:#f8f9fc;
+}
         #qb-panel.qb-max {
             top: 0; left: 0;
             transform: none;
@@ -737,15 +789,12 @@
             max-height: none !important;
             border-radius: 0 !important;
         }
-        .qb-box {
-            background: white;
-            display: flex;
-            flex-direction: column;
-            height: 100%;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.22);
-            overflow: hidden;
-        }
+        .qb-box{
+    display:flex;
+    flex-direction:column;
+    height:100%;
+    overflow:hidden;
+}
         #qb-panel.qb-max .qb-box { border-radius: 0; }
         .qb-topbar {
             background: linear-gradient(90deg, var(--primary), var(--primary-dark));
@@ -770,17 +819,6 @@
         }
         .qb-top-btn:hover { background: rgba(255,255,255,0.35); }
         .qb-layout { display: flex; flex: 1; overflow: hidden; }
-        .qb-left {
-            width: 42%;
-            min-width: 300px;
-            background: #f8f9fc;
-            border-right: 1px solid var(--border-color);
-            overflow-y: auto;
-            padding: 18px;
-            transition: width 0.3s;
-        }
-        .qb-left.qb-collapsed { width: 0 !important; min-width: 0; overflow: hidden; padding: 0; }
-        .qb-right { flex: 1; padding: 18px; overflow-y: auto; }
         .qb-divider { width: 5px; background: var(--border-color); cursor: col-resize; transition: background 0.15s; }
         .qb-divider:hover { background: var(--primary); }
         .qb-field-label {
@@ -803,29 +841,68 @@
             transition: border-color 0.2s;
         }
         .qb-select:focus, .qb-input:focus { border-color: var(--primary); outline: none; }
-        .qb-col-container {
-            max-height: 200px;
-            overflow-y: auto;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 10px;
-            background: white;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 6px;
-        }
-        .qb-col-item {
-            display: flex;
-            flex-direction: column;
-            gap: 3px;
-            border: 1px solid #f0f2f8;
-            padding: 5px 8px;
-            border-radius: 6px;
-            background: #fafbff;
-            font-size: 12px;
-        }
-        .qb-col-item span { font-size: 11px; color: #555; }
-        .qb-col-item select { font-size: 11px; border: 1px solid #e3e6f0; border-radius: 4px; padding: 2px 4px; }
+        .qb-col-container{
+    max-height:240px;
+    overflow-y:auto;
+    border:1px solid var(--border-color);
+    border-radius:8px;
+    padding:10px;
+    background:white;
+
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+}
+        .qb-col-item{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    border:1px solid #e6e9f2;
+    padding:8px;
+    border-radius:8px;
+    background:#fafbff;
+    font-size:12px;
+}
+.qb-col-head{
+    display:flex;
+    align-items:center;
+    gap:6px;
+}
+        .qb-col-head span{
+    font-size:12px;
+    font-weight:600;
+    color:#444;
+    word-break:break-word;
+}
+        .qb-col-item select{
+    font-size:11px;
+    border:1px solid #d8dbe6;
+    border-radius:5px;
+    padding:3px 4px;
+}
+
+.qb-table-group{
+    border:1px solid #e6e9f2;
+    border-radius:8px;
+    padding:8px;
+    background:white;
+}
+
+.qb-table-title{
+    font-size:12px;
+    font-weight:700;
+    color:#1a1f36;
+    margin-bottom:6px;
+    border-bottom:1px solid #eef1f7;
+    padding-bottom:4px;
+}
+
+.qb-table-columns{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:8px;
+}
+        
         .qb-filter-row { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
         .qb-filter-row .qb-select,
         .qb-filter-row .qb-input { width: auto; flex: 1; min-width: 70px; }
@@ -1061,7 +1138,7 @@
     <!-- ============================================================
          GRAPH SECTION
     ============================================================ -->
-    <div id="graph-section">
+    <!-- <div id="graph-section">
         <div class="section-heading">
             <i class="fas fa-chart-bar" style="color:var(--primary);"></i>
             Analytics &amp; Charts
@@ -1087,7 +1164,49 @@
                 </div>
             </th:block>
         </div>
+    </div> -->
+
+    <div id="graph-section">
+    <div class="section-heading">
+        <i class="fas fa-chart-bar" style="color:var(--primary);"></i>
+        Analytics & Charts
     </div>
+
+    <div class="graph-row">
+
+        <th:block th:each="metric : ${metrics}">
+            <div th:if="${metric.type == 'graph'}" class="graph-card">
+
+                <div class="graph-card-title" th:text="${metric.key}"></div>
+
+            
+                <div class="graph-toolbar">
+
+        <div class="chart-controls">
+            <button class="gc-btn gc-zin"  th:data-key="${metric.key}" title="Zoom In">+</button>
+            <button class="gc-btn gc-zout" th:data-key="${metric.key}" title="Zoom Out">−</button>
+            <button class="gc-btn gc-rst"  th:data-key="${metric.key}" title="Reset">↺</button>
+            <button class="gc-btn gc-dl"   th:data-key="${metric.key}" title="Download">⬇</button>
+        </div>
+
+        <select class="chart-type-sel" th:data-key="${metric.key}">
+            <option value="bar">Bar</option>
+            <option value="line">Line</option>
+            <option value="pie">Pie</option>
+        </select>
+
+    </div>
+
+                <div class="graph-body">
+
+                    <canvas th:id="${#strings.replace(metric.key,' ','') + 'Chart'}"></canvas>
+
+                </div>
+            </div>
+        </th:block>
+
+    </div>
+</div>
 
     <!-- ============================================================
          LIST SECTION (built by JS)
@@ -1270,7 +1389,7 @@
                         <label class="qb-field-label">Service / Schema</label>
                         <select class="qb-select" id="qbSchema">
                             <option value="" disabled selected>Select service</option>
-                            <option value="dashboard">dashboard</option>
+                            <option value="hrms">HRMS</option>
                         </select>
                     </div>
 
@@ -1527,93 +1646,330 @@
         /* ================================================================
            CHARTS
         ================================================================ */
+        // var charts = {};
+
+        // function renderChart(metric, type) {
+        //     type = type || 'bar';
+        //     var id     = metric.key.replace(/\W/g, '') + 'Chart';
+        //     var canvas = document.getElementById(id);
+        //     if (!canvas) return;
+        //     if (canvas._chartInst) canvas._chartInst.destroy();
+        //     var labels = metric.value.map(function (d) { return d.label; });
+        //     var values = metric.value.map(function (d) { return d.value; });
+        //     var maxVal = Math.max.apply(null, values) || 1;
+        //     var colors = ['#4e73df','#1cc88a','#36b9cc','#f6c23e','#e74a3b','#6610f2','#fd7e14','#20c9a6'];
+        //     canvas._chartInst = new Chart(canvas.getContext('2d'), {
+        //         type: type,
+        //         data: {
+        //             labels: type === 'pie' ? labels : labels.concat(['  ']),
+        //             datasets: [{
+        //                 label: metric.key,
+        //                 data:  type === 'pie' ? values : values.concat([0]),
+        //                 backgroundColor: type === 'pie' ? colors : 'rgba(78,115,223,0.55)',
+        //                 borderRadius: type === 'bar' ? 10 : 0,
+        //                 borderSkipped: false,
+        //                 tension: 0.4,
+        //                 fill: type === 'line',
+        //                 borderColor: type === 'line' ? '#4e73df' : undefined,
+        //                 borderWidth: type === 'line' ? 2 : 0
+        //             }]
+        //         },
+        //         options: {
+        //             responsive: true,
+        //             maintainAspectRatio: false,
+        //             legend: { display: type === 'pie', position: 'bottom' },
+        //             scales: type !== 'pie' ? {
+        //                 xAxes: [{ gridLines: { display: false } }],
+        //                 yAxes: [{ ticks: { beginAtZero: true, min: 0, max: maxVal * 1.5 } }]
+        //             } : {}
+        //         }
+        //     });
+        //     charts[metric.key] = canvas._chartInst;
+        // }
+
+        // metrics.forEach(function (m) { if (m.type === 'graph') renderChart(m); });
+
+        // /* Chart type change */
+        // document.querySelectorAll('.chart-type-sel').forEach(function (sel) {
+        //     sel.addEventListener('change', function () {
+        //         var m = metrics.find(function (x) { return x.key === sel.getAttribute('data-key'); });
+        //         if (m) renderChart(m, sel.value);
+        //     });
+        // });
+
+        // /* Chart zoom / download */
+        // document.querySelectorAll('.gc-zin').forEach(function (btn) {
+        //     btn.addEventListener('click', function () {
+        //         var ch = charts[btn.getAttribute('data-key')]; if (!ch) return;
+        //         var y = ch.options.scales.yAxes[0].ticks;
+        //         var r = (y.max - y.min) * 0.1;
+        //         y.min += r; y.max -= r; ch.update();
+        //     });
+        // });
+        // document.querySelectorAll('.gc-zout').forEach(function (btn) {
+        //     btn.addEventListener('click', function () {
+        //         var ch = charts[btn.getAttribute('data-key')]; if (!ch) return;
+        //         var y = ch.options.scales.yAxes[0].ticks;
+        //         var r = (y.max - y.min) * 0.1;
+        //         y.min -= r; y.max += r; ch.update();
+        //     });
+        // });
+        // document.querySelectorAll('.gc-rst').forEach(function (btn) {
+        //     btn.addEventListener('click', function () {
+        //         var ch = charts[btn.getAttribute('data-key')]; if (!ch) return;
+        //         var m  = metrics.find(function (x) { return x.key === btn.getAttribute('data-key'); });
+        //         if (!m) return;
+        //         var maxVal = Math.max.apply(null, m.value.map(function (d) { return d.value; })) || 1;
+        //         ch.options.scales.yAxes[0].ticks = { beginAtZero: true, min: 0, max: maxVal * 1.5 };
+        //         ch.update();
+        //     });
+        // });
+        // document.querySelectorAll('.gc-dl').forEach(function (btn) {
+        //     btn.addEventListener('click', function () {
+        //         var ch = charts[btn.getAttribute('data-key')]; if (!ch) return;
+        //         var a  = document.createElement('a');
+        //         a.href = ch.toBase64Image();
+        //         a.download = (btn.getAttribute('data-key') || 'chart') + '.png';
+        //         a.click();
+        //     });
+        // });
+
         var charts = {};
 
-        function renderChart(metric, type) {
-            type = type || 'bar';
-            var id     = metric.key.replace(/\W/g, '') + 'Chart';
-            var canvas = document.getElementById(id);
-            if (!canvas) return;
-            if (canvas._chartInst) canvas._chartInst.destroy();
-            var labels = metric.value.map(function (d) { return d.label; });
-            var values = metric.value.map(function (d) { return d.value; });
-            var maxVal = Math.max.apply(null, values) || 1;
-            var colors = ['#4e73df','#1cc88a','#36b9cc','#f6c23e','#e74a3b','#6610f2','#fd7e14','#20c9a6'];
-            canvas._chartInst = new Chart(canvas.getContext('2d'), {
-                type: type,
-                data: {
-                    labels: type === 'pie' ? labels : labels.concat(['  ']),
-                    datasets: [{
-                        label: metric.key,
-                        data:  type === 'pie' ? values : values.concat([0]),
-                        backgroundColor: type === 'pie' ? colors : 'rgba(78,115,223,0.55)',
-                        borderRadius: type === 'bar' ? 10 : 0,
-                        borderSkipped: false,
-                        tension: 0.4,
-                        fill: type === 'line',
-                        borderColor: type === 'line' ? '#4e73df' : undefined,
-                        borderWidth: type === 'line' ? 2 : 0
+function renderChart(metric, type){
+console.log("renderChart ::{}",metric)
+    type = type || "bar";
+
+    var id = metric.key.replace(/\W/g,'') + "Chart";
+
+    var canvas = document.getElementById(id);
+
+    if(!canvas) return;
+
+    if(charts[metric.key]){
+        charts[metric.key].destroy();
+    }
+
+    var labels = metric.value.map(function(d){ return d.label; });
+
+    var values = metric.value.map(function(d){ return d.value; });
+
+    var maxVal = Math.max.apply(null, values) || 1;
+
+    var colors = [
+        '#4e73df','#1cc88a','#36b9cc','#f6c23e',
+        '#e74a3b','#6610f2','#fd7e14','#20c9a6'
+    ];
+
+    var options = {
+         responsive: true,
+                maintainAspectRatio: true,
+                layout: { padding: 5 },
+                legend: { display: type !== 'bar', position: 'bottom' },
+                scales: type !== 'pie' ? {
+                    xAxes: [{ gridLines: { display: false,
+                    	drawOnChartArea: true} }],
+                    yAxes: [{
+                        ticks: {
+                            beginAtZero: true,
+                            min: 0,
+                            max: Math.max(...values) * 1.5
+                        }
                     }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    legend: { display: type === 'pie', position: 'bottom' },
-                    scales: type !== 'pie' ? {
-                        xAxes: [{ gridLines: { display: false } }],
-                        yAxes: [{ ticks: { beginAtZero: true, min: 0, max: maxVal * 1.5 } }]
-                    } : {}
+                } : {}
+    };
+
+    if(type !== "pie"){
+        options.scales = {
+            xAxes:[{
+                gridLines:{display:false}
+            }],
+            yAxes:[{
+                ticks:{
+                    beginAtZero:true,
+                    min:0,
+                    max:maxVal * 1.5
                 }
-            });
-            charts[metric.key] = canvas._chartInst;
+            }]
+        };
+    }
+
+    var chart = new Chart(canvas.getContext("2d"),{
+
+        type:type,
+
+        data:{
+            labels:labels,
+            datasets:[{
+
+                label:metric.key,
+
+                data:values,
+
+                backgroundColor: type === "pie"
+                    ? colors
+                    : "rgba(78,115,223,0.55)",
+
+                borderColor:"#4e73df",
+
+                borderWidth: type === "line" ? 2 : 0,
+
+                fill:type === "line",
+
+                borderRadius:type === "bar" ? 8 : 0
+            }]
+        },
+
+        options:options
+    });
+
+    charts[metric.key] = chart;
+}
+
+
+metrics.forEach(function(m){
+    if(m.type === "graph"){
+        renderChart(m);
+    }
+});
+
+
+/* Chart type switch */
+
+document.querySelectorAll(".chart-type-sel").forEach(function(sel){
+
+    sel.addEventListener("change",function(){
+
+        var key = sel.getAttribute("data-key");
+
+        var m = metrics.find(function(x){
+            return x.key === key;
+        });
+
+        if(m){
+            renderChart(m, sel.value);
         }
 
-        metrics.forEach(function (m) { if (m.type === 'graph') renderChart(m); });
+    });
 
-        /* Chart type change */
-        document.querySelectorAll('.chart-type-sel').forEach(function (sel) {
-            sel.addEventListener('change', function () {
-                var m = metrics.find(function (x) { return x.key === sel.getAttribute('data-key'); });
-                if (m) renderChart(m, sel.value);
-            });
+});
+
+
+/* ZOOM IN */
+
+document.querySelectorAll(".gc-zin").forEach(function(btn){
+
+    btn.addEventListener("click",function(){
+
+        var key = btn.getAttribute("data-key");
+
+        var ch = charts[key];
+
+        if(!ch || !ch.options.scales) return;
+
+        var y = ch.options.scales.yAxes[0].ticks;
+
+        var range = (y.max - y.min) * 0.1;
+
+        y.min += range;
+
+        y.max -= range;
+
+        ch.update();
+
+    });
+
+});
+
+
+/* ZOOM OUT */
+
+document.querySelectorAll(".gc-zout").forEach(function(btn){
+
+    btn.addEventListener("click",function(){
+
+        var key = btn.getAttribute("data-key");
+
+        var ch = charts[key];
+
+        if(!ch || !ch.options.scales) return;
+
+        var y = ch.options.scales.yAxes[0].ticks;
+
+        var range = (y.max - y.min) * 0.1;
+
+        y.min -= range;
+
+        y.max += range;
+
+        ch.update();
+
+    });
+
+});
+
+
+/* RESET */
+
+document.querySelectorAll(".gc-rst").forEach(function(btn){
+
+    btn.addEventListener("click",function(){
+
+        var key = btn.getAttribute("data-key");
+
+        var ch = charts[key];
+
+        if(!ch) return;
+
+        var m = metrics.find(function(x){
+            return x.key === key;
         });
 
-        /* Chart zoom / download */
-        document.querySelectorAll('.gc-zin').forEach(function (btn) {
-            btn.addEventListener('click', function () {
-                var ch = charts[btn.getAttribute('data-key')]; if (!ch) return;
-                var y = ch.options.scales.yAxes[0].ticks;
-                var r = (y.max - y.min) * 0.1;
-                y.min += r; y.max -= r; ch.update();
-            });
-        });
-        document.querySelectorAll('.gc-zout').forEach(function (btn) {
-            btn.addEventListener('click', function () {
-                var ch = charts[btn.getAttribute('data-key')]; if (!ch) return;
-                var y = ch.options.scales.yAxes[0].ticks;
-                var r = (y.max - y.min) * 0.1;
-                y.min -= r; y.max += r; ch.update();
-            });
-        });
-        document.querySelectorAll('.gc-rst').forEach(function (btn) {
-            btn.addEventListener('click', function () {
-                var ch = charts[btn.getAttribute('data-key')]; if (!ch) return;
-                var m  = metrics.find(function (x) { return x.key === btn.getAttribute('data-key'); });
-                if (!m) return;
-                var maxVal = Math.max.apply(null, m.value.map(function (d) { return d.value; })) || 1;
-                ch.options.scales.yAxes[0].ticks = { beginAtZero: true, min: 0, max: maxVal * 1.5 };
-                ch.update();
-            });
-        });
-        document.querySelectorAll('.gc-dl').forEach(function (btn) {
-            btn.addEventListener('click', function () {
-                var ch = charts[btn.getAttribute('data-key')]; if (!ch) return;
-                var a  = document.createElement('a');
-                a.href = ch.toBase64Image();
-                a.download = (btn.getAttribute('data-key') || 'chart') + '.png';
-                a.click();
-            });
-        });
+        if(!m) return;
+
+        var maxVal = Math.max.apply(null,
+            m.value.map(function(d){
+                return d.value;
+            })
+        ) || 1;
+
+        ch.options.scales.yAxes[0].ticks = {
+            beginAtZero:true,
+            min:0,
+            max:maxVal * 1.5
+        };
+
+        ch.update();
+
+    });
+
+});
+
+
+/* DOWNLOAD */
+
+document.querySelectorAll(".gc-dl").forEach(function(btn){
+
+    btn.addEventListener("click",function(){
+
+        var key = btn.getAttribute("data-key");
+
+        var ch = charts[key];
+
+        if(!ch) return;
+
+        var link = document.createElement("a");
+
+        link.href = ch.toBase64Image();
+
+        link.download = key + ".png";
+
+        link.click();
+
+    });
+
+});
+
 
         /* ================================================================
            LIST TABLES
@@ -2001,29 +2357,77 @@
         });
         document.addEventListener('mouseup', function () { resizing = false; document.body.style.cursor = ''; });
 
-        /* Schema → Tables */
         document.getElementById('qbSchema').addEventListener('change', function () {
-            var schema = this.value;
-            $.ajax({
-                url: '/get-schema-structure', method: 'POST',
-                contentType: 'application/json',
-                data: JSON.stringify({ schemaName: schema }),
-                beforeSend: ajaxHeaders,
-                success: function (res) {
-                    schemaData = res;
-                    groupedByTable = {};
-                    res.forEach(function (r) {
-                        if (!groupedByTable[r.tableName]) groupedByTable[r.tableName] = [];
-                        groupedByTable[r.tableName].push(r);
-                    });
-                    var tblSel = document.getElementById('qbTable');
-                    tblSel.innerHTML = '<option value="" disabled selected>Select table</option>';
-                    Object.keys(groupedByTable).forEach(function (t) { tblSel.appendChild(new Option(t, t)); });
-                    populateJoinTables();
-                },
-                error: function () { alert('Error loading schema'); }
+
+    const schema = this.value;
+    if (!schema) return;
+
+    $.ajax({
+        url: '/get-schema-structure',
+        method: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({ schemaName: schema }),
+        beforeSend: ajaxHeaders,
+
+        success: function (res) {
+
+            if (!res || !Array.isArray(res)) {
+                console.error("Invalid schema response:", res);
+                return;
+            }
+
+            schemaData = res;
+            groupedByTable = {};
+
+            /* Group columns by table */
+            res.forEach(function (row) {
+
+                const table = row.tableName || row.table_name;
+                const column = row.columnName || row.column_name;
+
+                if (!table || !column) return;
+
+                if (!groupedByTable[table]) {
+                    groupedByTable[table] = [];
+                }
+
+                groupedByTable[table].push({
+                    columnName: column,
+                    constraint: row.constraint,
+                    referenceTable: row.referenceTable,
+                    referenceColumn: row.referenceColumn
+                });
+
             });
-        });
+
+            renderTables();
+        },
+
+        error: function (err) {
+            console.error("Schema load failed:", err);
+            alert("Error loading schema structure");
+        }
+    });
+
+});
+
+function renderTables() {
+
+    const tblSel = document.getElementById('qbTable');
+
+    tblSel.innerHTML = '<option value="" disabled selected>Select table</option>';
+
+    Object.keys(groupedByTable).forEach(function (table) {
+
+        const option = document.createElement('option');
+        option.value = table;
+        option.textContent = table;
+
+        tblSel.appendChild(option);
+    });
+
+    populateJoinTables();
+}
 
         function populateJoinTables() {
             var sel = document.getElementById('qbJoinTable'); sel.innerHTML = '';
@@ -2032,52 +2436,198 @@
         }
 
         function buildColumns(tables) {
-            var con = document.getElementById('qbColContainer'); con.innerHTML = '';
-            var ff  = document.querySelector('.qb-filter-field');
-            var gb  = document.getElementById('qbGroupBy');
-            var ob  = document.getElementById('qbOrderBy');
-            ff.innerHTML = ''; gb.innerHTML = ''; ob.innerHTML = '';
-            tables.forEach(function (tbl) {
-                var cols = groupedByTable[tbl] || [];
-                cols.forEach(function (col) {
-                    var w   = document.createElement('div'); w.className = 'qb-col-item';
-                    var cb  = document.createElement('input'); cb.type = 'checkbox';
-                    cb.value = tbl + '.' + col.columnName; cb.className = 'qb-col-cb';
-                    var sp  = document.createElement('span'); sp.textContent = col.columnName;
-                    var ag  = document.createElement('select'); ag.className = 'qb-col-agg';
-                    ag.innerHTML = '<option value="">None</option><option>COUNT</option><option>SUM</option><option>AVG</option><option>MAX</option><option>MIN</option>';
-                    w.appendChild(cb); w.appendChild(sp); w.appendChild(ag);
-                    con.appendChild(w);
-                    var v = tbl + '.' + col.columnName;
-                    ff.appendChild(new Option(col.columnName, v));
-                    gb.appendChild(new Option(col.columnName, v));
-                    ob.appendChild(new Option(col.columnName, v));
-                });
-            });
-            // having fields = aggregated selected columns (updated on agg change)
-        }
+
+    const container = document.getElementById('qbColContainer');
+    container.innerHTML = '';
+
+    const filterField = document.querySelector('.qb-filter-field');
+    const groupBy = document.getElementById('qbGroupBy');
+    const orderBy = document.getElementById('qbOrderBy');
+
+    filterField.innerHTML = '';
+    groupBy.innerHTML = '';
+    orderBy.innerHTML = '';
+
+    tables.forEach(function (table) {
+
+        const columns = groupedByTable[table] || [];
+
+        /* Table Group Wrapper */
+        const tableGroup = document.createElement('div');
+        tableGroup.className = 'qb-table-group';
+
+        /* Table Header */
+        const tableTitle = document.createElement('div');
+        tableTitle.className = 'qb-table-title';
+        tableTitle.textContent = table;
+
+        tableGroup.appendChild(tableTitle);
+
+        /* Column Grid */
+        const colGrid = document.createElement('div');
+        colGrid.className = 'qb-table-columns';
+
+        columns.forEach(function (col) {
+
+            const wrapper = document.createElement('div');
+            wrapper.className = 'qb-col-item';
+
+            const head = document.createElement('div');
+            head.className = 'qb-col-head';
+
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.value = table + '.' + col.columnName;
+            checkbox.className = 'qb-col-cb';
+
+            const label = document.createElement('span');
+            label.textContent = col.columnName;
+
+            head.appendChild(checkbox);
+            head.appendChild(label);
+
+            checkbox.addEventListener('change', updateHavingFields);
+
+            const agg = document.createElement('select');
+            agg.className = 'qb-col-agg';
+
+            agg.innerHTML = `
+                <option value="">None</option>
+                <option value="COUNT">COUNT</option>
+                <option value="SUM">SUM</option>
+                <option value="AVG">AVG</option>
+                <option value="MAX">MAX</option>
+                <option value="MIN">MIN</option>
+            `;
+
+            agg.addEventListener('change', updateHavingFields);
+            wrapper.appendChild(head);
+            wrapper.appendChild(agg);
+
+            colGrid.appendChild(wrapper);
+
+            const value = table + '.' + col.columnName;
+
+            filterField.appendChild(new Option(value, value));
+            groupBy.appendChild(new Option(value, value));
+            orderBy.appendChild(new Option(value, value));
+        });
+
+        tableGroup.appendChild(colGrid);
+        container.appendChild(tableGroup);
+
+    });
+}
 
         document.getElementById('qbTable').addEventListener('change', function () {
-            document.getElementById('qbColSection').style.display = 'block';
-            buildColumns([this.value]);
-            populateJoinConditions();
-        });
-        document.getElementById('qbJoinTable').addEventListener('change', function () {
-            buildColumns([document.getElementById('qbTable').value, this.value].filter(Boolean));
-            populateJoinConditions();
-        });
 
-        function populateJoinConditions() {
-            var jc = document.getElementById('qbJoinCond'); jc.innerHTML = '<option disabled selected>Select condition</option>';
-            var p  = document.getElementById('qbTable').value;
-            var s  = document.getElementById('qbJoinTable').value;
-            if (!p || !s) return;
-            schemaData.filter(function (c) { return c.constraint === 'FOREIGN KEY'; }).forEach(function (fk) {
-                if (fk.tableName === s && fk.referenceTable === p) jc.appendChild(new Option(p + '.' + fk.referenceColumn + ' = ' + s + '.' + fk.columnName));
-                if (fk.tableName === p && fk.referenceTable === s) jc.appendChild(new Option(p + '.' + fk.columnName + ' = ' + s + '.' + fk.referenceColumn));
-            });
-            jc.appendChild(new Option('Custom condition', '__manual__'));
+    const table = this.value;
+
+    if (!table) return;
+
+    document.getElementById('qbColSection').style.display = 'block';
+
+    buildColumns([table]);
+
+    populateJoinConditions();
+});
+        document.getElementById('qbJoinTable').addEventListener('change', function () {
+
+    const mainTable = document.getElementById('qbTable').value;
+    const joinTable = this.value;
+
+    if (!mainTable) return;
+
+    const tables = [mainTable];
+
+    if (joinTable && joinTable !== mainTable) {
+        tables.push(joinTable);
+    }
+
+    buildColumns(tables);
+
+    populateJoinConditions();
+});
+
+function updateHavingFields(){
+
+    const havingField = document.querySelector('.qb-having-field');
+    const groupBy     = document.getElementById('qbGroupBy');
+
+    havingField.innerHTML = '';
+
+    const groupByValues = Array.from(groupBy.selectedOptions)
+                               .map(opt => opt.value);
+
+    document.querySelectorAll('.qb-col-item').forEach(function(item){
+
+        const cb  = item.querySelector('.qb-col-cb');
+        const agg = item.querySelector('.qb-col-agg');
+
+        if(!cb || !agg) return;
+
+        const column = cb.value;
+
+        /* show only if all conditions true */
+        if(cb.checked && agg.value && groupByValues.includes(column)){
+
+            const label = agg.value + '(' + column + ')';
+
+            havingField.appendChild(new Option(label, label));
         }
+
+    });
+}
+
+document.getElementById('qbGroupBy')
+        .addEventListener('change', updateHavingFields);
+
+       function populateJoinConditions(){
+
+    const jc = document.getElementById("qbJoinCond");
+    jc.innerHTML = '<option disabled selected>Select condition</option>';
+
+    const primaryTable = document.getElementById("qbTable").value;
+    const joinTable = document.getElementById("qbJoinTable").value;
+
+    if(!primaryTable || !joinTable) return;
+
+    schemaData.forEach(function(col){
+
+        const table = col.table_name;
+        const column = col.column_name;
+        const constraint = col.column_constraint;
+        const refTable = col.reference_table;
+        const refColumn = col.reference_column;
+
+        if(constraint !== "FOREIGN KEY") return;
+
+        /* Case 1: joinTable references primaryTable */
+        if(table === joinTable && refTable === primaryTable){
+
+            const condition =
+                primaryTable + "." + refColumn +
+                " = " +
+                joinTable + "." + column;
+
+            jc.appendChild(new Option(condition, condition));
+        }
+
+        /* Case 2: primaryTable references joinTable */
+        if(table === primaryTable && refTable === joinTable){
+
+            const condition =
+                primaryTable + "." + column +
+                " = " +
+                joinTable + "." + refColumn;
+
+            jc.appendChild(new Option(condition, condition));
+        }
+
+    });
+
+    jc.appendChild(new Option("Custom condition", "__manual__"));
+}
 
         document.getElementById('qbJoinCond').addEventListener('change', function () {
             var manual = document.getElementById('qbManualJoin');
@@ -2104,7 +2654,8 @@
                 cond = document.getElementById('qbJoinLeft').value + ' ' + document.getElementById('qbJoinOp').value + ' ' + document.getElementById('qbJoinRight').value;
             }
             if (!sec || !cond || cond === 'Select condition') return;
-            addListItem('qbJoinList', type + ' ' + sec + ' ON ' + cond, 'join');
+            var schema = document.getElementById('qbSchema').value;
+            addListItem('qbJoinList', type + ' ' + schema + '.' + sec + ' ON ' + cond, 'join');
         });
 
         document.getElementById('qbAddFilter').addEventListener('click', function () {
@@ -2205,7 +2756,7 @@
             var limStr = lim ? 'LIMIT ' + lim : '';
 
             var sql = ('SELECT ' + (selCols.length ? selCols.join(', ') : '*') +
-                       ' FROM ' + table + ' ' + joinStr + ' ' + whereStr + ' ' + gbStr + ' ' + havStr + ' ' + obStr + ' ' + limStr)
+                       ' FROM ' + schema + '.' + table + ' ' + joinStr + ' ' + whereStr + ' ' + gbStr + ' ' + havStr + ' ' + obStr + ' ' + limStr)
                       .replace(/\s+/g, ' ').trim();
 
             finalSql = schema + '_schema_name_' + sql;
@@ -2397,21 +2948,15 @@
         document.getElementById('chatSendBtn').addEventListener('click', sendChat);
         document.getElementById('chatInput').addEventListener('keypress', function (e) { if (e.key === 'Enter') sendChat(); });
 
-        // document.addEventListener('click', function (e) {
-        //     if (e.target && e.target.closest && e.target.closest('.module-opts')) {
-        //         var btn = e.target.closest('.module-opts').querySelector('[data-module]');
-        //         if (btn) chatBotReply(btn.getAttribute('data-module'));
-        //     }
-        //     if (e.target && e.target.hasAttribute && e.target.hasAttribute('data-module')) {
-        //         chatBotReply(e.target.getAttribute('data-module'));
-        //     }
-        // });
         document.addEventListener('click', function (e) {
-    if (e.target && e.target.hasAttribute && e.target.hasAttribute('data-module')) {
-        e.stopPropagation();
-        chatBotReply(e.target.getAttribute('data-module'));
-    }
-});
+            if (e.target && e.target.closest && e.target.closest('.module-opts')) {
+                var btn = e.target.closest('.module-opts').querySelector('[data-module]');
+                if (btn) chatBotReply(btn.getAttribute('data-module'));
+            }
+            if (e.target && e.target.hasAttribute && e.target.hasAttribute('data-module')) {
+                chatBotReply(e.target.getAttribute('data-module'));
+            }
+        });
 
         var _curRequest = null, _curService = null;
 
@@ -2469,17 +3014,8 @@
             _curRequest = $.ajax({ url: '/get-selected-question-answer/' + key, type: 'GET',
                 success: function (res) {
                     removeThinking();
-                    // var html = (Array.isArray(res) ? res : [res]).map(function(r){return Object.entries(r).map(function(kv){return '<b>'+kv[0]+':</b> '+kv[1];}).join('<br>');}).join('<br><br>');
-                    var html = (Array.isArray(res) ? res : [res])
-.map(function(r){
-    return Object.entries(r)
-    .map(function(kv){
-        return '<b>'+kv[0]+'</b> '+kv[1];
-    })
-    .join('<br>');
-})
-.join('<br><br>');
-html += '<div class="chat-options"><button onclick="chatBack()">← Back</button><button onclick="chatHome()">🏠 Modules</button></div>';
+                    var html = (Array.isArray(res) ? res : [res]).map(function(r){return Object.entries(r).map(function(kv){return '<b>'+kv[0]+':</b> '+kv[1];}).join('<br>');}).join('<br><br>');
+                    html += '<div class="chat-options"><button onclick="chatBack()">← Back</button><button onclick="chatHome()">🏠 Modules</button></div>';
                     addChatMsg('bot', html, true);
                 },
                 error: function (x) { if (x.statusText !== 'abort') { removeThinking(); addChatMsg('bot', '⚠️ Error.'); } }
@@ -2499,18 +3035,8 @@ html += '<div class="chat-options"><button onclick="chatBack()">← Back</button
             _curRequest = $.ajax({ url: '/get-answer-by-ask-quetion-using-rag/' + encodeURIComponent(val), type: 'GET',
                 success: function (res) {
                     removeThinking();
-                   // var html = (Array.isArray(res) ? res : [res]).map(function(r){return Object.entries(r).map(function(kv){return '<b>'+kv[0]+':</b> '+kv[1];}).join('<br>');}).join('<br><br>');
-                    
-                    var html = (Array.isArray(res) ? res : [res])
-.map(function(r){
-    return Object.entries(r)
-    .map(function(kv){
-        return '<b>'+kv[0]+'</b> '+kv[1];
-    })
-    .join('<br>');
-})
-.join('<br><br>');
-html += '<div class="chat-options"><button onclick="chatHome()">🏠 Modules</button></div>';
+                    var html = (Array.isArray(res) ? res : [res]).map(function(r){return Object.entries(r).map(function(kv){return '<b>'+kv[0]+':</b> '+kv[1];}).join('<br>');}).join('<br><br>');
+                    html += '<div class="chat-options"><button onclick="chatHome()">🏠 Modules</button></div>';
                     addChatMsg('bot', html, true);
                 },
                 error: function (x) { if (x.statusText !== 'abort') { removeThinking(); addChatMsg('bot', '⚠️ Something went wrong.'); } }
