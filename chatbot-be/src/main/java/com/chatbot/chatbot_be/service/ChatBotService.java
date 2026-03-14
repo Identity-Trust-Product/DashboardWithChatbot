@@ -9,8 +9,8 @@ public interface ChatBotService {
 	
 	//String askQuestionAndGetQuery(String question);
 	Set<String> askSerivceWiseDataInFile(String serviceName);
-	Map<String, String> getSelectedQuestionsAnswer(String questions);
-	 Map<String, String> getAnswerByAskQuetionUsingRAG(String que);
+	List<Map<String, Object>> getSelectedQuestionsAnswer(String questions);
+	 List<Map<String, Object>> getAnswerByAskQuetionUsingRAG(String que);
 	 List<Map<String, Object>> generateAnswerUsingOllama(String que,List<Map<String, Object>> dbLevelAnswer);
 	 List<Map<String, Object>> generateAnswerUsingOllamaWithPython(String que,List<Map<String, Object>> dbLevelAnswer);
 

@@ -5,8 +5,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations;
 import org.springframework.stereotype.Repository;
 
+import java.sql.ResultSetMetaData;
 import java.util.*;
 
 /**
@@ -20,6 +22,9 @@ public class HrmsRepository {
 
     private static final Logger log = LoggerFactory.getLogger(HrmsRepository.class);
 
+    @Autowired
+	private NamedParameterJdbcOperations namedParameterJdbcOperations;
+    
     @Autowired
     private JdbcTemplate jdbc;
 
@@ -391,4 +396,23 @@ public class HrmsRepository {
             "ORDER BY c.table_name, c.ordinal_position",
             schemaName, schemaName, schemaName);
     }
+
+
+
+	public List<Map<String, Object>> executeDynamicQuery(String sql) {
+		  return namedParameterJdbcOperations.getJdbcOperations().query(sql, rs -> {
+	            List<Map<String, Object>> resultList = new ArrayList<>();
+	            ResultSetMetaData metaData = rs.getMetaData();
+	            int columnCount = metaData.getColumnCount();
+
+	            while (rs.next()) {
+	                Map<String, Object> row = new HashMap<>();
+	                for (int i = 1; i <= columnCount; i++) {
+	                    row.put(metaData.getColumnLabel(i), rs.getObject(i));
+	                }
+	                resultList.add(row);
+	            }
+	            return resultList;
+	        });
+	}
 }
