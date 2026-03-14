@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+
+<head>
+    <meta charset="UTF-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
+
+    <!-- CSRF tokens (safe with th:if so no NPE if security is disabled) -->
+    <meta name="_csrf"        th:if="${_csrf}" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:if="${_csrf}" th:content="${_csrf.headerName}"/>
+    <meta name="_context_path" th:content="@{/}"/>
+
+    <title layout:title-pattern="$CONTENT_TITLE - EDP">EDP Portal</title>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800;900&display=swap" rel="stylesheet"/>
+    <!-- Bootstrap 4 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css"/>
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+    <!-- DataTables Bootstrap4 CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap4.min.css"/>
+    <!-- jQuery UI (for draggable widgets) -->
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css"/>
+
+    <style>
+        /* ======================================================
+           CSS VARIABLES
+        ====================================================== */
+        :root {
+            --sidebar-width:   230px;
+            --topbar-height:   58px;
+            --sidebar-bg:      #1a1f36;
+            --sidebar-hover:   rgba(255,255,255,0.08);
+            --primary:         #4e73df;
+            --primary-dark:    #224abe;
+            --accent-green:    #1cc88a;
+            --accent-yellow:   #f6c23e;
+            --accent-red:      #e74a3b;
+            --body-bg:         #f0f2f8;
+            --topbar-bg:       #ffffff;
+            --text-muted:      #858796;
+            --card-shadow:     0 2px 14px rgba(0,0,0,0.07);
+            --border-color:    #e3e6f0;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: var(--body-bg);
+            margin: 0; padding: 0;
+            overflow-x: hidden;
+        }
+
+        /* ======================================================
+           PAGE LOADER
+        ====================================================== */
+        #page-loader {
+            position: fixed; inset: 0;
+            background: white;
+            z-index: 99999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            transition: opacity 0.4s;
+        }
+        .loader-brand {
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--primary);
+            letter-spacing: 2px;
+        }
+        .loader-bar-wrap {
+            width: 180px;
+            height: 4px;
+            background: #e3e6f0;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .loader-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--primary), var(--accent-green));
+            border-radius: 4px;
+            animation: loadBar 1.2s ease-out forwards;
+        }
+        @keyframes loadBar { to { width: 100%; } }
+
+        /* ======================================================
+           SIDEBAR
+        ====================================================== */
+        #sidebar {
+            position: fixed;
+            top: 0; left: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: var(--sidebar-bg);
+            z-index: 1050;
+            display: flex;
+            flex-direction: column;
+            transition: width 0.3s ease, transform 0.3s ease;
+            overflow: hidden;
+        }
+        #sidebar.collapsed { width: 62px; }
+
+        /* Brand */
+        .sidebar-brand {
+            height: var(--topbar-height);
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            gap: 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            text-decoration: none;
+            flex-shrink: 0;
+        }
+        .sidebar-brand-icon {
+            width: 36px; height: 36px;
+            background: linear-gradient(135deg, var(--primary), #6610f2);
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            color: white;
+            font-size: 17px;
+            flex-shrink: 0;
+            box-shadow: 0 4px 12px rgba(78,115,223,0.4);
+        }
+        .sidebar-brand-text {
+            font-size: 15px;
+            font-weight: 800;
+            color: white;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+            transition: opacity 0.2s, width 0.3s;
+        }
+
+        /* Nav */
+        .sidebar-nav {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px 0;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255,255,255,0.1) transparent;
+        }
+        .nav-section-title {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.6px;
+            color: rgba(255,255,255,0.28);
+            padding: 14px 18px 5px;
+            white-space: nowrap;
+            transition: opacity 0.2s;
+        }
+        .nav-link-item {
+            display: flex;
+            align-items: center;
+            gap: 13px;
+            padding: 10px 18px;
+            color: rgba(255,255,255,0.62);
+            text-decoration: none;
+            font-size: 13.5px;
+            font-weight: 600;
+            transition: all 0.2s;
+            white-space: nowrap;
+            position: relative;
+            border-left: 3px solid transparent;
+        }
+        .nav-link-item:hover {
+            background: var(--sidebar-hover);
+            color: white;
+            text-decoration: none;
+            border-left-color: rgba(78,115,223,0.5);
+        }
+        .nav-link-item.active {
+            background: linear-gradient(90deg, rgba(78,115,223,0.22), transparent);
+            color: white;
+            border-left-color: var(--primary);
+        }
+        .nav-icon {
+            width: 20px;
+            text-align: center;
+            font-size: 15px;
+            flex-shrink: 0;
+        }
+        .nav-text { transition: opacity 0.2s; }
+
+        /* Sidebar footer */
+        .sidebar-footer {
+            padding: 14px 18px;
+            border-top: 1px solid rgba(255,255,255,0.06);
+            flex-shrink: 0;
+        }
+        .sidebar-footer a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: rgba(255,255,255,0.4);
+            font-size: 13px;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        .sidebar-footer a:hover { color: white; }
+
+        /* Collapsed sidebar hides text */
+        #sidebar.collapsed .sidebar-brand-text,
+        #sidebar.collapsed .nav-text,
+        #sidebar.collapsed .nav-section-title {
+            opacity: 0;
+            pointer-events: none;
+            width: 0;
+            overflow: hidden;
+        }
+
+        /* ======================================================
+           TOPBAR
+        ====================================================== */
+        #topbar {
+            position: fixed;
+            top: 0;
+            left: var(--sidebar-width);
+            right: 0;
+            height: var(--topbar-height);
+            background: var(--topbar-bg);
+            box-shadow: 0 2px 14px rgba(0,0,0,0.07);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 22px;
+            z-index: 1040;
+            transition: left 0.3s ease;
+        }
+        .topbar-left {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        #sidebar-toggle-btn {
+            background: none;
+            border: 1px solid var(--border-color);
+            font-size: 16px;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 6px 10px;
+            border-radius: 8px;
+            transition: 0.2s;
+        }
+        #sidebar-toggle-btn:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        .topbar-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: #2d3748;
+        }
+        .topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .topbar-icon-btn {
+            position: relative;
+            width: 38px; height: 38px;
+            border-radius: 50%;
+            border: 1px solid var(--border-color);
+            background: white;
+            color: #555;
+            font-size: 15px;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: 0.2s;
+        }
+        .topbar-icon-btn:hover { background: var(--primary); color: white; border-color: var(--primary); }
+        .topbar-badge {
+            position: absolute;
+            top: 1px; right: 1px;
+            width: 16px; height: 16px;
+            background: var(--accent-red);
+            color: white;
+            font-size: 9px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 700;
+            border: 1.5px solid white;
+        }
+        .topbar-divider {
+            width: 1px; height: 26px;
+            background: var(--border-color);
+            margin: 0 6px;
+        }
+        .user-dropdown-btn {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: none;
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            padding: 6px 12px;
+            border-radius: 10px;
+            transition: 0.2s;
+        }
+        .user-dropdown-btn:hover { background: #f0f2f8; }
+        .user-avatar {
+            width: 34px; height: 34px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--accent-green));
+            color: white;
+            font-weight: 800;
+            font-size: 13px;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .user-name { font-size: 13px; font-weight: 700; color: #2d3748; line-height: 1.2; }
+        .user-role { font-size: 11px; color: var(--text-muted); }
+
+        /* ======================================================
+           PAGE WRAPPER & CONTENT
+        ====================================================== */
+        #page-wrapper {
+            margin-left: var(--sidebar-width);
+            margin-top: var(--topbar-height);
+            min-height: calc(100vh - var(--topbar-height));
+            transition: margin-left 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+        #page-wrapper.sidebar-collapsed { margin-left: 62px; }
+        #page-content { padding: 22px; flex: 1; }
+
+        /* ======================================================
+           FOOTER
+        ====================================================== */
+        #footer {
+            background: white;
+            padding: 13px 22px;
+            text-align: center;
+            font-size: 12.5px;
+            color: var(--text-muted);
+            border-top: 1px solid var(--border-color);
+        }
+        #footer a { color: var(--primary); }
+
+        /* ======================================================
+           LOGOUT MODAL
+        ====================================================== */
+        .logout-modal-header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            border-radius: 10px 10px 0 0;
+        }
+        .logout-modal-header .close { color: white; opacity: 0.9; }
+
+        /* ======================================================
+           MOBILE RESPONSIVE
+        ====================================================== */
+        @media (max-width: 768px) {
+            #sidebar {
+                transform: translateX(-100%);
+                width: var(--sidebar-width) !important;
+            }
+            #sidebar.mobile-open {
+                transform: translateX(0);
+            }
+            #sidebar.mobile-open .sidebar-brand-text,
+            #sidebar.mobile-open .nav-text,
+            #sidebar.mobile-open .nav-section-title {
+                opacity: 1 !important;
+                pointer-events: auto !important;
+                width: auto !important;
+            }
+            #topbar { left: 0 !important; }
+            #page-wrapper { margin-left: 0 !important; }
+            .topbar-title { display: none; }
+            #sidebar-overlay {
+                display: none;
+                position: fixed;
+                inset: 0;
+                background: rgba(0,0,0,0.5);
+                z-index: 1049;
+            }
+            #sidebar.mobile-open ~ #sidebar-overlay { display: block; }
+        }
+    </style>
+</head>
+
+<body id="page-top">
+
+<!-- ===================== PAGE LOADER ===================== -->
+<div id="page-loader">
+    <div class="loader-brand">EDP PORTAL</div>
+    <div class="loader-bar-wrap">
+        <div class="loader-bar"></div>
+    </div>
+</div>
+
+<!-- Sidebar overlay for mobile -->
+<div id="sidebar-overlay"></div>
+
+<!-- ===================== SIDEBAR ===================== -->
+<nav id="sidebar">
+
+    <!-- Brand -->
+    <a class="sidebar-brand" th:href="@{/}">
+        <div class="sidebar-brand-icon">
+            <i class="fas fa-layer-group"></i>
+        </div>
+        <span class="sidebar-brand-text">EDP Portal</span>
+    </a>
+
+    <!-- Nav links -->
+    <div class="sidebar-nav">
+
+        <div class="nav-section-title">Main</div>
+
+        <a class="nav-link-item active" th:href="@{/}">
+            <span class="nav-icon"><i class="fas fa-tachometer-alt"></i></span>
+            <span class="nav-text">Dashboard</span>
+        </a>
+
+        <a class="nav-link-item" th:href="@{/configure-my-dashboard}">
+            <span class="nav-icon"><i class="fas fa-sliders-h"></i></span>
+            <span class="nav-text">Configure Dashboard</span>
+        </a>
+
+        <div class="nav-section-title">Modules</div>
+
+        <a class="nav-link-item" href="#">
+            <span class="nav-icon"><i class="fas fa-users"></i></span>
+            <span class="nav-text">HRD</span>
+        </a>
+
+        <a class="nav-link-item" href="#">
+            <span class="nav-icon"><i class="fas fa-file-invoice-dollar"></i></span>
+            <span class="nav-text">Claims</span>
+        </a>
+
+        <a class="nav-link-item" href="#">
+            <span class="nav-icon"><i class="fas fa-shield-alt"></i></span>
+            <span class="nav-text">Policy</span>
+        </a>
+
+        <a class="nav-link-item" href="#">
+            <span class="nav-icon"><i class="fas fa-chart-bar"></i></span>
+            <span class="nav-text">Reports</span>
+        </a>
+
+        <a class="nav-link-item" href="#">
+            <span class="nav-icon"><i class="fas fa-graduation-cap"></i></span>
+            <span class="nav-text">Training</span>
+        </a>
+
+        <div class="nav-section-title">Account</div>
+
+        <a class="nav-link-item" href="#">
+            <span class="nav-icon"><i class="fas fa-user-cog"></i></span>
+            <span class="nav-text">Profile</span>
+        </a>
+
+        <a class="nav-link-item" href="#">
+            <span class="nav-icon"><i class="fas fa-bell"></i></span>
+            <span class="nav-text">Notifications</span>
+        </a>
+
+    </div>
+
+    <!-- Sidebar footer logout -->
+    <div class="sidebar-footer">
+        <a href="#" data-toggle="modal" data-target="#logoutModal">
+            <span class="nav-icon"><i class="fas fa-sign-out-alt"></i></span>
+            <span class="nav-text">Logout</span>
+        </a>
+    </div>
+
+</nav>
+
+<!-- ===================== TOPBAR ===================== -->
+<div id="topbar">
+
+    <div class="topbar-left">
+        <button id="sidebar-toggle-btn" title="Toggle Sidebar">
+            <i class="fas fa-bars"></i>
+        </button>
+        <span class="topbar-title">
+            <i class="fas fa-building mr-1" style="color:var(--primary);"></i>
+            Enterprise Digital Platform
+        </span>
+    </div>
+
+    <div class="topbar-right">
+
+        <!-- Alert -->
+        <button class="topbar-icon-btn" title="Alerts">
+            <i class="fas fa-bell"></i>
+            <span class="topbar-badge">3</span>
+        </button>
+
+        <!-- Messages -->
+        <button class="topbar-icon-btn" title="Messages">
+            <i class="fas fa-envelope"></i>
+            <span class="topbar-badge">1</span>
+        </button>
+
+        <div class="topbar-divider"></div>
+
+        <!-- User -->
+        <button class="user-dropdown-btn" data-toggle="modal" data-target="#logoutModal">
+            <div class="user-avatar">U</div>
+            <div>
+                <div class="user-name">User</div>
+                <div class="user-role">Administrator</div>
+            </div>
+            <i class="fas fa-chevron-down ml-1" style="font-size:10px;color:#bbb;"></i>
+        </button>
+
+    </div>
+</div>
+
+<!-- ===================== MAIN PAGE WRAPPER ===================== -->
+<div id="page-wrapper">
+
+    <div id="page-content">
+        <!-- Page content injected here -->
+        <div layout:fragment="content">
+            <p class="text-muted">No content to display.</p>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer id="footer">
+        <span id="footerSpan">
+            UI Template Version: 1.0 &nbsp;&bull;&nbsp; &copy; 2025
+            <a href="https://www.cdac.in/" target="_blank">CDAC EDP</a>
+            &nbsp; All rights reserved | Developed by C-DAC Mumbai.
+        </span>
+    </footer>
+
+</div>
+
+<!-- ===================== LOGOUT MODAL ===================== -->
+<div class="modal fade" id="logoutModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-dialog-centered modal-sm" role="document">
+        <div class="modal-content border-0 shadow-lg" style="border-radius:14px; overflow:hidden;">
+            <div class="modal-header logout-modal-header border-0">
+                <h5 class="modal-title font-weight-bold">
+                    <i class="fas fa-sign-out-alt mr-2"></i>Ready to Leave?
+                </h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body text-center py-4">
+                <p class="mb-0" style="font-size:14px;">
+                    Select <strong>"Logout"</strong> to end your current session.
+                </p>
+            </div>
+            <div class="modal-footer border-0 justify-content-center pb-4">
+                <button class="btn btn-secondary px-4" data-dismiss="modal">Cancel</button>
+                <form th:action="@{/logout}" method="post" class="d-inline">
+                    <input type="hidden"
+                           th:if="${_csrf}"
+                           th:name="${_csrf.parameterName}"
+                           th:value="${_csrf.token}"/>
+                    <button type="submit" class="btn btn-danger px-4">
+                        <i class="fas fa-sign-out-alt mr-1"></i>Logout
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ===================== SCRIPTS ===================== -->
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.6.4/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap4.min.js"></script>
+<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+
+<script>
+    /* ---- PAGE LOADER DISMISS ---- */
+    window.addEventListener('load', function () {
+        var loader = document.getElementById('page-loader');
+        if (loader) {
+            loader.style.opacity = '0';
+            setTimeout(function () { loader.remove(); }, 450);
+        }
+    });
+
+    /* ---- SIDEBAR TOGGLE ---- */
+    var sidebar     = document.getElementById('sidebar');
+    var pageWrapper = document.getElementById('page-wrapper');
+    var topbar      = document.getElementById('topbar');
+    var toggleBtn   = document.getElementById('sidebar-toggle-btn');
+    var overlay     = document.getElementById('sidebar-overlay');
+
+    function isMobile() { return window.innerWidth <= 768; }
+
+    toggleBtn.addEventListener('click', function () {
+        if (isMobile()) {
+            sidebar.classList.toggle('mobile-open');
+            overlay.style.display = sidebar.classList.contains('mobile-open') ? 'block' : 'none';
+        } else {
+            var collapsed = sidebar.classList.toggle('collapsed');
+            pageWrapper.classList.toggle('sidebar-collapsed', collapsed);
+            topbar.style.left = collapsed ? '62px' : 'var(--sidebar-width)';
+        }
+    });
+
+    overlay.addEventListener('click', function () {
+        sidebar.classList.remove('mobile-open');
+        overlay.style.display = 'none';
+    });
+
+    /* ---- ACTIVE NAV LINK ---- */
+    document.querySelectorAll('.nav-link-item').forEach(function (link) {
+        link.addEventListener('click', function () {
+            document.querySelectorAll('.nav-link-item').forEach(function (l) { l.classList.remove('active'); });
+            this.classList.add('active');
+        });
+    });
+
+    /* ---- FOOTER version fetch ---- */
+    (function () {
+        var cp = document.querySelector('meta[name="_context_path"]');
+        if (!cp) return;
+        var contextPath = cp.content;
+        fetch(contextPath + 'get-fe-service-version')
+            .then(function (r) { return r.json(); })
+            .then(function (res) {
+                var ver = res.serviceVersionFE || '1.0';
+                document.getElementById('footerSpan').innerHTML =
+                    'UI Template Version: 1.0 &nbsp;&bull;&nbsp; Service Version: ' + ver +
+                    ' &nbsp;&bull;&nbsp; &copy; 2025 <a href="https://www.cdac.in/" target="_blank">CDAC EDP</a>' +
+                    ' All rights reserved | Developed by C-DAC Mumbai.';
+            })
+            .catch(function () { /* keep default footer text */ });
+    })();
+</script>
+
+<!-- Page-specific scripts slot -->
+<th:block layout:fragment="scripts"></th:block>
+
+</body>
+</html>

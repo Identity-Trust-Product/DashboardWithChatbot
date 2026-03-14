@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout}">
+<head>
+    <title>Configure Dashboard</title>
+    <style>
+        /* =============================================
+           BASE
+        ============================================= */
+        .cfg-page { padding: 0 4px; }
+
+        .card-header {
+            background: linear-gradient(90deg, #4e73df, #36b9cc);
+            color: #fff;
+            font-weight: 700;
+            font-size: 17px;
+            border-radius: 12px 12px 0 0;
+            padding: 14px 20px;
+            display: flex; align-items: center; gap: 10px;
+        }
+
+        /* =============================================
+           SUCCESS ALERT
+        ============================================= */
+        .success-bar {
+            display: flex; align-items: center; gap: 10px;
+            background: #d4edda; border: 1px solid #c3e6cb; color: #155724;
+            padding: 13px 16px; border-radius: 8px; margin-bottom: 16px;
+            font-size: 14px; font-weight: 600;
+            animation: fadeIn 0.4s ease;
+        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+        .success-bar .close-x { margin-left: auto; background: none; border: none; color: #155724; font-size: 20px; cursor: pointer; }
+
+        /* =============================================
+           MODULE SELECTOR
+        ============================================= */
+        .module-selector-row {
+            display: flex; align-items: center; gap: 14px; margin-bottom: 20px; flex-wrap: wrap;
+        }
+        .module-selector-label { font-size: 15px; font-weight: 700; color: #2d3748; white-space: nowrap; }
+        .module-select {
+            flex: 1; min-width: 220px;
+            padding: 10px 14px; border: 2px solid #e3e6f0; border-radius: 10px;
+            font-size: 14px; font-weight: 600; color: #2d3748;
+            cursor: pointer; transition: border-color 0.2s;
+            appearance: none;
+            background: white url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%234e73df' d='M6 8L1 3h10z'/%3E%3C/svg%3E") no-repeat right 14px center;
+        }
+        .module-select:focus { border-color: #4e73df; box-shadow: 0 0 0 3px rgba(78,115,223,0.15); outline: none; }
+
+        /* =============================================
+           OVERLAY + POPUP
+        ============================================= */
+        #overlay {
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,0.5); backdrop-filter: blur(3px);
+            z-index: 2000; opacity: 0; transition: opacity 0.25s;
+        }
+        #overlay.show { display: block; opacity: 1; }
+
+        #metrics-popup {
+            display: none; position: fixed;
+            top: 50%; left: 50%;
+            transform: translate(-50%,-50%) scale(0.95);
+            background: #fff; border-radius: 16px;
+            padding: 28px 24px; z-index: 2100;
+            width: 460px; max-width: 95vw; max-height: 80vh; overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+            opacity: 0; transition: all 0.25s;
+        }
+        #metrics-popup.show {
+            display: block; opacity: 1;
+            transform: translate(-50%,-50%) scale(1);
+        }
+        body.modal-open { overflow: hidden; }
+
+        .popup-header {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 16px; padding-bottom: 12px; border-bottom: 2px solid #f0f2f8;
+        }
+        .popup-title { font-size: 17px; font-weight: 800; color: #1a1f36; }
+        .popup-close {
+            background: none; border: none; font-size: 22px; color: #e74a3b;
+            cursor: pointer; font-weight: 700; line-height: 1;
+            transition: color 0.2s; padding: 0 4px;
+        }
+        .popup-close:hover { color: #c0392b; }
+
+        /* Popup: select all/none row */
+        .popup-actions {
+            display: flex; gap: 8px; margin-bottom: 12px;
+        }
+        .popup-btn {
+            padding: 5px 14px; border-radius: 8px; font-size: 12px; font-weight: 700;
+            cursor: pointer; border: 1px solid; transition: 0.2s;
+        }
+        .popup-btn-all { border-color: #4e73df; color: #4e73df; background: none; }
+        .popup-btn-all:hover { background: #4e73df; color: white; }
+        .popup-btn-none { border-color: #e74a3b; color: #e74a3b; background: none; }
+        .popup-btn-none:hover { background: #e74a3b; color: white; }
+
+        /* Popup: metric list items */
+        #metrics-list { list-style: none; padding: 0; margin: 0; }
+        #metrics-list li {
+            display: flex; align-items: center; gap: 10px;
+            padding: 10px 12px; border-radius: 8px; margin-bottom: 4px;
+            transition: background 0.15s; cursor: pointer;
+        }
+        #metrics-list li:hover { background: #f0f5ff; }
+        #metrics-list li.checked  { background: rgba(78,115,223,0.06); }
+
+        #metrics-list input[type="checkbox"] {
+            width: 17px; height: 17px; accent-color: #4e73df; cursor: pointer; flex-shrink: 0;
+        }
+
+        .metric-popup-label { flex: 1; font-size: 13px; font-weight: 600; color: #2d3748; }
+        .metric-type-tag {
+            padding: 2px 9px; border-radius: 12px; font-size: 10px; font-weight: 800;
+            text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        .tag-count       { background: rgba(78,115,223,0.12); color: #4e73df; }
+        .tag-percentage  { background: rgba(28,200,138,0.12); color: #1cc88a; }
+        .tag-speedometer { background: rgba(246,194,62,0.12);  color: #d4a017; }
+        .tag-graph       { background: rgba(54,185,204,0.12);  color: #36b9cc; }
+        .tag-list        { background: rgba(231,74,59,0.12);   color: #e74a3b; }
+        .tag-todo        { background: rgba(102,16,242,0.12);  color: #6610f2; }
+
+        /* =============================================
+           SELECTED METRICS PREVIEW
+        ============================================= */
+        #selected-metrics-wrap {
+            display: none; margin-top: 20px;
+            background: #fff; border-radius: 14px; padding: 22px;
+            box-shadow: 0 2px 16px rgba(0,0,0,0.06);
+        }
+        .selected-header {
+            font-size: 14px; font-weight: 800; color: #1a1f36;
+            margin-bottom: 14px; display: flex; align-items: center; gap: 8px;
+        }
+        .selected-header i { color: #4e73df; }
+
+        .module-block {
+            background: #f8fafc; border-radius: 10px;
+            padding: 14px 16px; margin-bottom: 14px;
+            border-left: 4px solid #4e73df;
+        }
+        .module-block-name {
+            font-size: 13px; font-weight: 800; color: #4e73df; margin-bottom: 10px;
+            display: flex; align-items: center; gap: 6px;
+        }
+        .metrics-chips {
+            display: flex; flex-wrap: wrap; gap: 8px;
+        }
+        .chip {
+            display: inline-flex; align-items: center; gap: 6px;
+            background: linear-gradient(135deg, #4e73df, #36b9cc);
+            color: white; padding: 5px 13px; border-radius: 20px;
+            font-size: 12px; font-weight: 700;
+            box-shadow: 0 2px 8px rgba(78,115,223,0.25);
+            transition: all 0.2s;
+        }
+        .chip:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(78,115,223,0.35); }
+        .chip-remove {
+            background: none; border: none; color: rgba(255,255,255,0.8);
+            cursor: pointer; font-size: 15px; line-height: 1; padding: 0 0 0 2px;
+            font-weight: 700; transition: color 0.15s;
+        }
+        .chip-remove:hover { color: #fff; }
+
+        /* Empty state */
+        .empty-state { color: #adb5bd; font-size: 13px; font-style: italic; padding: 8px 0; }
+
+        /* =============================================
+           SUBMIT BUTTON
+        ============================================= */
+        .submit-row { text-align: center; margin-top: 22px; }
+        .btn-submit-config {
+            background: linear-gradient(135deg, #4e73df, #36b9cc);
+            border: none; color: white;
+            padding: 12px 36px; font-size: 15px; font-weight: 800;
+            border-radius: 10px; cursor: pointer;
+            box-shadow: 0 4px 14px rgba(78,115,223,0.3);
+            transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px;
+        }
+        .btn-submit-config:hover { transform: translateY(-2px); box-shadow: 0 8px 22px rgba(78,115,223,0.4); }
+        .btn-submit-config:disabled { opacity: 0.6; transform: none; cursor: not-allowed; }
+
+        /* =============================================
+           RESPONSIVE
+        ============================================= */
+        @media (max-width: 600px) {
+            .module-selector-row { flex-direction: column; align-items: stretch; }
+            .module-selector-label { white-space: normal; }
+        }
+    </style>
+</head>
+
+<body>
+<div layout:fragment="content" class="cfg-page">
+
+    <!-- breadcrumb -->
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb" style="background:none; padding:0; margin-bottom:14px;">
+            <li class="breadcrumb-item"><a th:href="@{/}">Home</a></li>
+            <li class="breadcrumb-item active">Configure Dashboard</li>
+        </ol>
+    </nav>
+
+    <!-- success alert -->
+    <div class="success-bar" th:if="${actionSuccess}" id="successAlert">
+        <i class="fas fa-check-circle" style="font-size:18px;"></i>
+        <span th:text="${actionSuccess}">Saved!</span>
+        <button class="close-x" onclick="document.getElementById('successAlert').style.display='none'">&times;</button>
+    </div>
+
+    <!-- card -->
+    <div class="card shadow mb-4">
+        <div class="card-header">
+            <i class="fas fa-sliders-h"></i>
+            Custom Dashboard Configuration
+        </div>
+        <div class="card-body">
+
+            <!-- hidden form -->
+            <form id="cfgForm" th:action="@{/configure-card}" method="post">
+                <input type="hidden" name="dashboardDataJson" id="dashboardDataJson"/>
+                <input type="hidden" th:if="${_csrf}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+
+                <!-- MODULE SELECTOR -->
+                <div class="module-selector-row">
+                    <label class="module-selector-label">
+                        <i class="fas fa-layer-group" style="color:#4e73df;"></i>
+                        Select Module to configure&nbsp;/&nbsp;
+                        <span style="font-weight:500;color:#6c757d;">डैशबोर्ड मॉड्यूल चुनें</span>
+                        <span class="text-danger">*</span>
+                    </label>
+                    <select class="module-select" id="moduleSelect">
+                        <option value="">── Choose a module ──</option>
+                        <option th:each="cfg : ${dashboardConfigs}"
+                                th:value="${cfg.module}"
+                                th:text="${cfg.module}"></option>
+                    </select>
+                </div>
+
+                <!-- SELECTED METRICS PREVIEW -->
+                <div id="selected-metrics-wrap">
+                    <div class="selected-header">
+                        <i class="fas fa-th-large"></i>
+                        Selected widgets for your dashboard
+                        <span style="font-weight:500;color:#858796;font-size:13px;">
+                            — डैशबोर्ड पर प्रदर्शित होने के लिए चयनित
+                        </span>
+                    </div>
+                    <div id="metricsContainer">
+                        <p class="empty-state">No widgets selected yet. Choose a module above.</p>
+                    </div>
+                </div>
+
+                <!-- SUBMIT -->
+                <div class="submit-row">
+                    <button type="button" class="btn-submit-config" id="submitBtn">
+                        <i class="fas fa-save"></i> Save Configuration
+                    </button>
+                </div>
+            </form>
+
+        </div><!-- card-body -->
+    </div><!-- card -->
+
+    <!-- OVERLAY -->
+    <div id="overlay"></div>
+
+    <!-- POPUP -->
+    <div id="metrics-popup">
+        <div class="popup-header">
+            <div class="popup-title" id="popupTitle">Select Widgets</div>
+            <button class="popup-close" id="popupClose">&times;</button>
+        </div>
+        <div class="popup-actions">
+            <button class="popup-btn popup-btn-all"  id="popupSelectAll">&#10003; Select All</button>
+            <button class="popup-btn popup-btn-none" id="popupSelectNone">&#9633; Clear All</button>
+        </div>
+        <ul id="metrics-list"></ul>
+    </div>
+
+</div><!-- layout:fragment -->
+
+<!-- ============================================================
+     SCRIPTS
+============================================================ -->
+<th:block layout:fragment="scripts">
+<script th:inline="javascript">
+
+    // ── Server-side data ──────────────────────────────────────────────────────
+    var dashboardConfigs   = /*[[${dashboardConfigs}]]*/ [];
+    var userId             = /*[[${userId}]]*/ '';
+    var savedConfigRaw     = /*[[${savedDashboardConfig}]]*/ null;
+
+    // ── State ─────────────────────────────────────────────────────────────────
+    var dashboardSelections = [];   // [{module:"...", metrics:[{key,type,value,url},...]}]
+    var activeModuleName    = null;
+
+    // ── DOM refs ──────────────────────────────────────────────────────────────
+    var moduleSelect       = document.getElementById('moduleSelect');
+    var popup              = document.getElementById('metrics-popup');
+    var overlay            = document.getElementById('overlay');
+    var metricsList        = document.getElementById('metrics-list');
+    var popupTitle         = document.getElementById('popupTitle');
+    var popupClose         = document.getElementById('popupClose');
+    var popupSelectAll     = document.getElementById('popupSelectAll');
+    var popupSelectNone    = document.getElementById('popupSelectNone');
+    var metricsContainer   = document.getElementById('metricsContainer');
+    var selectedWrap       = document.getElementById('selected-metrics-wrap');
+    var submitBtn          = document.getElementById('submitBtn');
+    var cfgForm            = document.getElementById('cfgForm');
+    var hiddenInput        = document.getElementById('dashboardDataJson');
+
+    // ── Type badge CSS class ──────────────────────────────────────────────────
+    function typeClass(type) {
+        return ({
+            count:'tag-count', percentage:'tag-percentage',
+            speedometer:'tag-speedometer', graph:'tag-graph',
+            list:'tag-list', todo:'tag-todo'
+        })[type] || 'tag-count';
+    }
+
+    function typeIcon(type) {
+        return ({
+            count:'fas fa-hashtag', percentage:'fas fa-percent',
+            speedometer:'fas fa-tachometer-alt', graph:'fas fa-chart-bar',
+            list:'fas fa-list', todo:'fas fa-tasks', favorites:'fas fa-star'
+        })[type] || 'fas fa-circle';
+    }
+
+    // ── Init: restore saved config ────────────────────────────────────────────
+    (function initSaved() {
+        if (!savedConfigRaw) return;
+        try {
+            var saved = JSON.parse(savedConfigRaw);
+            dashboardSelections = JSON.parse(JSON.stringify(saved.selections || []));
+            renderPreview();
+        } catch(e) { console.warn('savedConfig parse error:', e); }
+    })();
+
+    // ── Module dropdown change → open popup ───────────────────────────────────
+    moduleSelect.addEventListener('change', function() {
+        var moduleName = this.value;
+        if (!moduleName) return;
+        activeModuleName = moduleName;
+
+        var cfg = dashboardConfigs.find(function(c){ return c.module === moduleName; });
+        if (!cfg) return;
+
+        openPopup(moduleName, cfg.metrics);
+        // Reset dropdown so same module can be re-opened
+        setTimeout(function(){ moduleSelect.value = ''; }, 300);
+    });
+
+    // ── Open popup ────────────────────────────────────────────────────────────
+    function openPopup(moduleName, availableMetrics) {
+        popupTitle.textContent = moduleName;
+        metricsList.innerHTML  = '';
+
+        // Ensure a slot exists in selections
+        var slot = dashboardSelections.find(function(s){ return s.module === moduleName; });
+        if (!slot) {
+            slot = { module: moduleName, metrics: [] };
+            dashboardSelections.push(slot);
+        }
+
+        availableMetrics.forEach(function(metric, idx) {
+            var li  = document.createElement('li');
+            var chk = document.createElement('input');
+            chk.type = 'checkbox';
+            chk.id   = 'chk-' + idx;
+            chk.checked = !!slot.metrics.find(function(m){ return m.key === metric.key; });
+            if (chk.checked) li.classList.add('checked');
+
+            chk.addEventListener('change', function() {
+                if (this.checked) {
+                    if (!slot.metrics.find(function(m){ return m.key === metric.key; })) {
+                        slot.metrics.push(metric);
+                    }
+                    li.classList.add('checked');
+                } else {
+                    slot.metrics = slot.metrics.filter(function(m){ return m.key !== metric.key; });
+                    li.classList.remove('checked');
+                }
+                renderPreview();
+            });
+
+            var lbl  = document.createElement('label');
+            lbl.setAttribute('for', chk.id);
+            lbl.className = 'metric-popup-label';
+            lbl.textContent = metric.key;
+
+            var tag  = document.createElement('span');
+            tag.className = 'metric-type-tag ' + typeClass(metric.type);
+            tag.textContent = metric.type;
+
+            li.appendChild(chk);
+            li.appendChild(lbl);
+            li.appendChild(tag);
+
+            li.addEventListener('click', function(e) {
+                if (e.target !== chk) { chk.click(); }
+            });
+
+            metricsList.appendChild(li);
+        });
+
+        overlay.classList.add('show');
+        popup.classList.add('show');
+        document.body.classList.add('modal-open');
+    }
+
+    // ── Close popup ───────────────────────────────────────────────────────────
+    function closePopup() {
+        overlay.classList.remove('show');
+        popup.classList.remove('show');
+        document.body.classList.remove('modal-open');
+    }
+
+    popupClose.addEventListener('click', closePopup);
+    overlay.addEventListener('click',   closePopup);
+
+    // ── Select all / none inside popup ────────────────────────────────────────
+    popupSelectAll.addEventListener('click', function() {
+        metricsList.querySelectorAll('input[type="checkbox"]').forEach(function(c){
+            if (!c.checked) { c.click(); }
+        });
+    });
+    popupSelectNone.addEventListener('click', function() {
+        metricsList.querySelectorAll('input[type="checkbox"]').forEach(function(c){
+            if (c.checked) { c.click(); }
+        });
+    });
+
+    // ── Render preview panel ──────────────────────────────────────────────────
+    function renderPreview() {
+        metricsContainer.innerHTML = '';
+        var hasAny = dashboardSelections.some(function(s){ return s.metrics.length > 0; });
+
+        if (!hasAny) {
+            metricsContainer.innerHTML = '<p class="empty-state">No widgets selected yet. Choose a module above.</p>';
+            selectedWrap.style.display = 'none';
+            return;
+        }
+        selectedWrap.style.display = 'block';
+
+        dashboardSelections.forEach(function(slot) {
+            if (slot.metrics.length === 0) return;
+
+            var block = document.createElement('div');
+            block.className = 'module-block';
+
+            var name = document.createElement('div');
+            name.className = 'module-block-name';
+            name.innerHTML = '<i class="fas fa-layer-group"></i>' + escHtml(slot.module)
+                           + ' <span style="color:#858796;font-weight:600;font-size:12px;">('
+                           + slot.metrics.length + ' widget' + (slot.metrics.length > 1 ? 's' : '') + ')</span>';
+
+            var chips = document.createElement('div');
+            chips.className = 'metrics-chips';
+
+            slot.metrics.forEach(function(metric) {
+                var chip = document.createElement('div');
+                chip.className = 'chip';
+
+                var ico = document.createElement('i');
+                ico.className = typeIcon(metric.type);
+
+                var txt = document.createTextNode(' ' + metric.key);
+
+                var btn = document.createElement('button');
+                btn.className = 'chip-remove';
+                btn.innerHTML = '&times;';
+                btn.title     = 'Remove';
+                btn.onclick   = function(e) {
+                    e.stopPropagation();
+                    slot.metrics = slot.metrics.filter(function(m){ return m.key !== metric.key; });
+                    // Uncheck in popup if open
+                    metricsList.querySelectorAll('input[type="checkbox"]').forEach(function(c){
+                        var lbl = c.parentElement.querySelector('.metric-popup-label');
+                        if (lbl && lbl.textContent === metric.key) c.checked = false;
+                    });
+                    renderPreview();
+                };
+
+                chip.appendChild(ico);
+                chip.appendChild(txt);
+                chip.appendChild(btn);
+                chips.appendChild(chip);
+            });
+
+            block.appendChild(name);
+            block.appendChild(chips);
+            metricsContainer.appendChild(block);
+        });
+    }
+
+    // ── Submit ────────────────────────────────────────────────────────────────
+    submitBtn.addEventListener('click', function() {
+        var hasAny = dashboardSelections.some(function(s){ return s.metrics.length > 0; });
+        if (!hasAny) {
+            alert('Please select at least one widget before saving!');
+            return;
+        }
+
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+
+        var payload = {
+            userId:     userId,
+            selections: dashboardSelections.filter(function(s){ return s.metrics.length > 0; })
+        };
+        hiddenInput.value = JSON.stringify(payload);
+        cfgForm.submit();
+    });
+
+    // ── Auto-redirect after success ───────────────────────────────────────────
+    (function autoRedirect() {
+        var alert = document.getElementById('successAlert');
+        if (alert) {
+            setTimeout(function(){ window.location.href = '/'; }, 3000);
+        }
+    })();
+
+    // ── Util ──────────────────────────────────────────────────────────────────
+    function escHtml(s) {
+        return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+</script>
+</th:block>
+
+</body>
+</html>
