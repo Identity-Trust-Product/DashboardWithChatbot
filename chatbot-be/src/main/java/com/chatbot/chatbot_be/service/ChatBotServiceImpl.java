@@ -14,12 +14,14 @@ import org.springframework.ai.embedding.EmbeddingModel;
 import org.springframework.ai.ollama.OllamaChatModel;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
 
 import com.chatbot.chatbot_be.model.ChatIn;
 import com.chatbot.chatbot_be.model.ChatOut;
 import com.chatbot.chatbot_be.proxy.ChatBotOllamaClient;
+import com.chatbot.chatbot_be.repository.HrmsRepository;
 
 
 
@@ -41,7 +43,10 @@ public class ChatBotServiceImpl implements ChatBotService {
     @Value("${spring.ai.ollama.chat.model}")
     private String currentModel;
     
-//	@Override
+	 @Autowired
+    private HrmsRepository repo;
+
+	//	@Override
 //	public String askQuestionAndGetQuery(String userQuestion) {
 //		
 //		 String closestQuestion = null;
@@ -75,7 +80,7 @@ public class ChatBotServiceImpl implements ChatBotService {
 	 
 	 
 	 @Override
-		public Map<String, String> getSelectedQuestionsAnswer(String question) {
+		public List<Map<String, Object>> getSelectedQuestionsAnswer(String question) {
 		 String serviceName = question.split("\\.")[0];  
 		 System.out.println(serviceName);
 			Properties props=getProperty(serviceName);
@@ -94,7 +99,11 @@ public class ChatBotServiceImpl implements ChatBotService {
 			}
 			 Map<String, String> keys = new HashMap<>();
 		        keys.put(serviceName, query);
-		        return keys;
+				
+			 List<Map<String, Object>> dbLevelAnswer=repo.executeDynamicQuery(query);
+			 List<Map<String, Object>> resopnse=generateAnswerUsingOllama(onlyQuestion,dbLevelAnswer);
+				
+		        return resopnse;
 		}
 	 
 	 public Properties getProperty(String serviceName) {
@@ -109,7 +118,7 @@ public class ChatBotServiceImpl implements ChatBotService {
 	    }
 
 	@Override
-	public  Map<String, String> getAnswerByAskQuetionUsingRAG(String que) {
+	public  List<Map<String, Object>> getAnswerByAskQuetionUsingRAG(String que) {
 		Map<String, String> data = propertiesLoaderService.getAll();
         float[] userEmbedding = embeddingModel.embed(que);
         String bestKey = null;
@@ -125,11 +134,17 @@ public class ChatBotServiceImpl implements ChatBotService {
 	                bestScore = score;
 	                bestKey = key;
 	                FinalServiceNameAndQuetion=ServiceNameAndQuetion.split("\\.")[0];
-	            }
+	            }	
 	        }
         Map<String, String> keys = new HashMap<>();
         keys.put(FinalServiceNameAndQuetion, data.get(bestKey));
-        return keys;
+
+		List<Map<String, Object>> dbLevelAnswer=repo.executeDynamicQuery(data.get(bestKey));
+		System.out.println("bestKey "+bestKey);
+			 List<Map<String, Object>> resopnse=generateAnswerUsingOllama(bestKey,dbLevelAnswer);
+				
+		        return resopnse;
+       // return keys;
 	}
 
 	 private double cosineSimilarity(float[] v1, float[] v2) {
@@ -233,6 +248,7 @@ public class ChatBotServiceImpl implements ChatBotService {
 
 	     Map<String, Object> responseMap = new LinkedHashMap<>();
 	     responseMap.put("", aiResponse.trim());
+		 System.out.println("🔍 Using Ollama Model responseMap from ollama : "+ responseMap);
 
 	     return List.of(responseMap);
 	 }

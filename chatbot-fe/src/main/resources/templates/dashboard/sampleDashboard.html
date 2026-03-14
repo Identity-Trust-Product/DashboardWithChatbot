@@ -2397,15 +2397,21 @@
         document.getElementById('chatSendBtn').addEventListener('click', sendChat);
         document.getElementById('chatInput').addEventListener('keypress', function (e) { if (e.key === 'Enter') sendChat(); });
 
+        // document.addEventListener('click', function (e) {
+        //     if (e.target && e.target.closest && e.target.closest('.module-opts')) {
+        //         var btn = e.target.closest('.module-opts').querySelector('[data-module]');
+        //         if (btn) chatBotReply(btn.getAttribute('data-module'));
+        //     }
+        //     if (e.target && e.target.hasAttribute && e.target.hasAttribute('data-module')) {
+        //         chatBotReply(e.target.getAttribute('data-module'));
+        //     }
+        // });
         document.addEventListener('click', function (e) {
-            if (e.target && e.target.closest && e.target.closest('.module-opts')) {
-                var btn = e.target.closest('.module-opts').querySelector('[data-module]');
-                if (btn) chatBotReply(btn.getAttribute('data-module'));
-            }
-            if (e.target && e.target.hasAttribute && e.target.hasAttribute('data-module')) {
-                chatBotReply(e.target.getAttribute('data-module'));
-            }
-        });
+    if (e.target && e.target.hasAttribute && e.target.hasAttribute('data-module')) {
+        e.stopPropagation();
+        chatBotReply(e.target.getAttribute('data-module'));
+    }
+});
 
         var _curRequest = null, _curService = null;
 
@@ -2463,8 +2469,17 @@
             _curRequest = $.ajax({ url: '/get-selected-question-answer/' + key, type: 'GET',
                 success: function (res) {
                     removeThinking();
-                    var html = (Array.isArray(res) ? res : [res]).map(function(r){return Object.entries(r).map(function(kv){return '<b>'+kv[0]+':</b> '+kv[1];}).join('<br>');}).join('<br><br>');
-                    html += '<div class="chat-options"><button onclick="chatBack()">← Back</button><button onclick="chatHome()">🏠 Modules</button></div>';
+                    // var html = (Array.isArray(res) ? res : [res]).map(function(r){return Object.entries(r).map(function(kv){return '<b>'+kv[0]+':</b> '+kv[1];}).join('<br>');}).join('<br><br>');
+                    var html = (Array.isArray(res) ? res : [res])
+.map(function(r){
+    return Object.entries(r)
+    .map(function(kv){
+        return '<b>'+kv[0]+'</b> '+kv[1];
+    })
+    .join('<br>');
+})
+.join('<br><br>');
+html += '<div class="chat-options"><button onclick="chatBack()">← Back</button><button onclick="chatHome()">🏠 Modules</button></div>';
                     addChatMsg('bot', html, true);
                 },
                 error: function (x) { if (x.statusText !== 'abort') { removeThinking(); addChatMsg('bot', '⚠️ Error.'); } }
@@ -2484,8 +2499,18 @@
             _curRequest = $.ajax({ url: '/get-answer-by-ask-quetion-using-rag/' + encodeURIComponent(val), type: 'GET',
                 success: function (res) {
                     removeThinking();
-                    var html = (Array.isArray(res) ? res : [res]).map(function(r){return Object.entries(r).map(function(kv){return '<b>'+kv[0]+':</b> '+kv[1];}).join('<br>');}).join('<br><br>');
-                    html += '<div class="chat-options"><button onclick="chatHome()">🏠 Modules</button></div>';
+                   // var html = (Array.isArray(res) ? res : [res]).map(function(r){return Object.entries(r).map(function(kv){return '<b>'+kv[0]+':</b> '+kv[1];}).join('<br>');}).join('<br><br>');
+                    
+                    var html = (Array.isArray(res) ? res : [res])
+.map(function(r){
+    return Object.entries(r)
+    .map(function(kv){
+        return '<b>'+kv[0]+'</b> '+kv[1];
+    })
+    .join('<br>');
+})
+.join('<br><br>');
+html += '<div class="chat-options"><button onclick="chatHome()">🏠 Modules</button></div>';
                     addChatMsg('bot', html, true);
                 },
                 error: function (x) { if (x.statusText !== 'abort') { removeThinking(); addChatMsg('bot', '⚠️ Something went wrong.'); } }

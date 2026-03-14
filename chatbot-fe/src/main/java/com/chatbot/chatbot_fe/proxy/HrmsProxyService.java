@@ -355,25 +355,25 @@ public class HrmsProxyService {
     // =========================================================================
 
     public Set<String> getSerivceWiseDataInFile(String moduleId) {
-        try {
-            String url = beBaseUrl + "/api/chatbot/modules?moduleId=" + moduleId;
+        // try {
+            String url = beBaseUrl + "/chatbot/get-data-in-properties-file-servicewise?moduleId=" + moduleId;
             ResponseEntity<Set<String>> resp = rest.exchange(
                 url, HttpMethod.GET, null,
                 new ParameterizedTypeReference<Set<String>>() {});
             return resp.getBody() != null ? resp.getBody() : new LinkedHashSet<>();
-        } catch (Exception e) {
-            log.error("chatbot modules error: {}", e.getMessage());
-            return new LinkedHashSet<>();
-        }
+        // } catch (Exception e) {
+        //     log.error("chatbot modules error: {}", e.getMessage());
+        //     return new LinkedHashSet<>();
+        // }
     }
 
     public List<Map<String, Object>> getSelectedQuestionsAnswer(String question) {
-        return getList("/api/chatbot/answer?question=" +
+        return getList("/chatbot/get-selected-question-answer?question=" +
                 java.net.URLEncoder.encode(question, java.nio.charset.StandardCharsets.UTF_8));
     }
 
     public List<Map<String, Object>> getAnswerByAskQuetionUsingRAG(String que) {
-        return getList("/api/chatbot/rag?question=" +
+        return getList("/chatbot/get-answer-by-ask-quetion-using-rag?question=" +
                 java.net.URLEncoder.encode(que, java.nio.charset.StandardCharsets.UTF_8));
     }
 }

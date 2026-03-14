@@ -5,16 +5,20 @@ import java.util.Map;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.chatbot.chatbot_be.service.ChatBotService;
 
 @RestController
+@RequestMapping("/chatbot")
+@CrossOrigin(origins = "http://localhost:9091")
 public class ChatBotController {
 	
 	@Autowired
@@ -32,24 +36,24 @@ public class ChatBotController {
 		return "Hello";
 	}
 
-	@GetMapping("/get-data-in-properties-file-servicewise/{moduleID}")
-	public Set<String> askSerivceWiseDataInFile(@PathVariable("moduleID") String moduleID) {
-		System.out.println("moduleID:"+moduleID);
-		Set<String> response = chatBotService.askSerivceWiseDataInFile(moduleID);
+	@GetMapping("/get-data-in-properties-file-servicewise")
+	public Set<String> askSerivceWiseDataInFile(@RequestParam String moduleId) {
+		System.out.println("moduleID:"+moduleId);
+		Set<String> response = chatBotService.askSerivceWiseDataInFile(moduleId);
 		return response;
 	}
 	
-	@GetMapping("/get-selected-question-answer/{question}")
-	public Map<String, String> getSelectedQuestionsAnswer(@PathVariable("question") String question) {
+	@GetMapping("/get-selected-question-answer")
+	public List<Map<String, Object>> getSelectedQuestionsAnswer(@RequestParam String question) {
 		System.out.println("Question:"+question);
-		Map<String, String> response = chatBotService.getSelectedQuestionsAnswer(question);
+		List<Map<String, Object>> response = chatBotService.getSelectedQuestionsAnswer(question);
 		return response;
 	}
 	
-	@GetMapping("/get-answer-by-ask-quetion-using-rag/{que}")
-	public  Map<String, String> getAnswerByAskQuetionUsingRAG(@PathVariable("que") String que) {
-		System.out.println("RAG Question:"+que);
-		 Map<String, String> response = chatBotService.getAnswerByAskQuetionUsingRAG(que);
+	@GetMapping("/get-answer-by-ask-quetion-using-rag")
+	public  List<Map<String, Object>> getAnswerByAskQuetionUsingRAG(@RequestParam String question) {
+		System.out.println("RAG Question:"+question);
+		 List<Map<String, Object>> response = chatBotService.getAnswerByAskQuetionUsingRAG(question);
 		return response;
 	}
 	
