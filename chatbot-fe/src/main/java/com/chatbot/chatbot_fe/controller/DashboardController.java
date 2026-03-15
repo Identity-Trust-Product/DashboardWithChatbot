@@ -269,6 +269,19 @@ public class DashboardController {
     map.put("/payroll/pending/count", proxy::countPendingPayroll);
     map.put("/employees/by-department", proxy::employeesByDepartment);
     map.put("/get/employee-list", proxy::getAllEmployeesAsMap);
+    map.put("/leaves/approval-rate", proxy::leaveApprovalRate);
+    map.put("/get/employee-list", proxy::getAllEmployeesAsMap);
+    map.put("/payroll/processed-rate", proxy::payrollProcessedRate);
+    map.put("/performance/avg-percent", proxy::avgPerformancePercent);
+    map.put("/performance/avg-rating", proxy::avgPerformanceRating);
+    map.put("/p/attendance/avg-hours", proxy::avgWorkingHours);
+    map.put("/attendance/monthly-trend", proxy::monthlyAttendanceTrend);
+    map.put("/payroll/monthly-cost", proxy::monthlySalaryCost);
+    map.put("/leaves/by-type", proxy::leavesByType);
+    map.put("/employees/joining-trend", proxy::joiningTrendByYear);
+    map.put("/employees/by-employment-marital-status", proxy::employeeListByMaritalStatus);
+    map.put("/employees/by-employment-salary", proxy::employeesBySalary);
+
 
     return map;
 }
@@ -440,6 +453,8 @@ public String configureMyDashboard(Model model) {
                 m.add(metric("Employee Joining Trend",       "graph",      null, "/employees/joining-trend"));
                 m.add(metric("Headcount by Status",          "graph",      null, "/employees/by-status"));
                 m.add(metric("Employee Directory",           "list",       null, "/get/employee-list"));
+                 m.add(metric("Employee Marital Status",           "graph",       null, "/employees/by-employment-marital-status"));
+                  m.add(metric("Employee VS Salary",           "graph",       null, "/employees/by-employment-salary"));
                 break;
             case "Attendance":
                 m.add(metric("Present Today",                "count",      null, "/attendance/present-today/count"));

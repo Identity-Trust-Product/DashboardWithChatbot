@@ -71,6 +71,19 @@ public class HrmsController {
         return svc.employeesByEmploymentType();
     }
 
+    
+    @GetMapping("/employees/by-employment-marital-status")
+    public List<Map<String, Object>> employeeListByMaritalStatus() {
+        return svc.employeeListByMaritalStatus();
+    }
+
+    
+    @GetMapping("/employees/by-employment-salary")
+    public List<Map<String, Object>> employeesBySalary() {
+        return svc.employeesBySalary();
+    }
+
+
     @GetMapping("/employees/by-status")
     public List<Map<String, Object>> byStatus() {
         return svc.employeesByStatus();

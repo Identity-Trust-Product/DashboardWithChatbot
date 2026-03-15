@@ -46,6 +46,9 @@ public interface HrmsService {
     List<Map<String, Object>> monthlyAttendanceTrend();
     List<Map<String, Object>> monthlySalaryCost();
     List<Map<String, Object>> leavesByType();
+    List<Map<String, Object>> employeeListByMaritalStatus();
+    List<Map<String, Object>> employeesBySalary();
+    
 
     // ── User config ───────────────────────────────────────────────────────────
     Map<String, Object> getUserConfig(String userId);

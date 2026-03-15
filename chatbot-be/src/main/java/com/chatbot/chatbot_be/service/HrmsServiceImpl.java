@@ -62,6 +62,8 @@ public class HrmsServiceImpl implements HrmsService {
     @Override public List<Map<String, Object>> monthlyAttendanceTrend()    { return repo.monthlyAttendanceTrend(); }
     @Override public List<Map<String, Object>> monthlySalaryCost()         { return repo.monthlySalaryCost(); }
     @Override public List<Map<String, Object>> leavesByType()              { return repo.leavesByType(); }
+    @Override public List<Map<String, Object>> employeesBySalary()         { return repo.employeesBySalary(); }
+    @Override public List<Map<String, Object>> employeeListByMaritalStatus()   { return repo.employeeListByMaritalStatus(); }
 
     // ── User config ───────────────────────────────────────────────────────────
     @Override
@@ -105,4 +107,6 @@ public class HrmsServiceImpl implements HrmsService {
         log.info("schemaStructure: {}", schemaStructure);
         return schemaStructure;
     }
+
+
 }

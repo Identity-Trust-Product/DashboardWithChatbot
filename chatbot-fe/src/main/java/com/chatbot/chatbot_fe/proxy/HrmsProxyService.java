@@ -159,6 +159,14 @@ public class HrmsProxyService {
         return getList("/api/employees/by-department");
     }
 
+    public List<Map<String, Object>> employeeListByMaritalStatus() {
+        return getList("/api/employees/by-employment-marital-status");
+    }
+
+    public List<Map<String, Object>> employeesBySalary() {
+        return getList("/api/employees/by-employment-salary");
+    }
+
     public List<Map<String, Object>> employeesByEmploymentType() {
         return getList("/api/employees/by-employment-type");
     }

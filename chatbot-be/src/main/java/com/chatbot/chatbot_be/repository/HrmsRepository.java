@@ -77,6 +77,16 @@ public class HrmsRepository {
             "GROUP BY d.name ORDER BY value DESC");
     }
 
+    public List<Map<String, Object>> employeeListByMaritalStatus(){
+    
+        return jdbc.queryForList("select marital_status AS label, count(id) AS value from hrms.employees group by marital_status");
+    }
+
+    public List<Map<String, Object>> employeesBySalary(){
+
+        return jdbc.queryForList("select first_name AS label, basic_salary AS value from hrms.employees");
+}
+
     /** Employees by employment type */
     public List<Map<String, Object>> employeesByEmploymentType() {
         return jdbc.queryForList(
