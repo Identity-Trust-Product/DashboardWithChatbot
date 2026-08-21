@@ -332,8 +332,44 @@ public class HrmsRepository {
 
     public List<Map<String, Object>> getAllUsers() {
         return jdbc.queryForList(
-            "SELECT u.id, u.email, u.username, u.is_active, u.created_at, r.name AS role " +
-            "FROM hrms.users u LEFT JOIN hrms.roles r ON u.role_id = r.id ORDER BY u.id");
+            "SELECT u.username, u.email, u.role_id, r.name AS role, u.is_active, " +
+            "u.created_at, u.updated_at " +
+            "FROM hrms.users u LEFT JOIN hrms.roles r ON u.role_id = r.id " +
+            "ORDER BY u.username");
+    }
+
+    public Map<String, Object> findUserForAuthentication(String username) {
+        return jdbc.query(
+            "SELECT u.username, u.is_active, u.hashed_password AS password_value, " +
+            "u.role_id, r.name AS role " +
+            "FROM hrms.users u LEFT JOIN hrms.roles r ON u.role_id = r.id " +
+            "WHERE LOWER(u.username) = LOWER(?) LIMIT 1",
+            ps -> ps.setString(1, username),
+            rs -> rs.next() ? userRow(rs) : new LinkedHashMap<>());
+    }
+
+    private Map<String, Object> userRow(java.sql.ResultSet rs) throws java.sql.SQLException {
+        Map<String, Object> user = new LinkedHashMap<>();
+        user.put("username", rs.getString("username"));
+        user.put("is_active", rs.getBoolean("is_active"));
+        user.put("password_value", rs.getString("password_value"));
+        user.put("role", rs.getString("role"));
+        return user;
+    }
+
+    public boolean userExists(String email, String username) {
+        Integer count = jdbc.queryForObject(
+            "SELECT COUNT(*) FROM hrms.users WHERE LOWER(email)=LOWER(?) OR LOWER(username)=LOWER(?)",
+            Integer.class, email, username);
+        return count != null && count > 0;
+    }
+
+    public int insertUser(String email, String username, String encodedPassword) {
+        return jdbc.update(
+            "INSERT INTO hrms.users " +
+            "(username, email, hashed_password, role_id, is_active, created_at, updated_at) " +
+            "VALUES (?, ?, ?, (SELECT id FROM hrms.roles WHERE LOWER(name)='user' LIMIT 1), true, now(), now())",
+            username, email, encodedPassword);
     }
 
     // =========================================================================

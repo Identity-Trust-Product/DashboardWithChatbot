@@ -10,14 +10,21 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableWebSecurity
 public class SecurityConfig {
 
+    private final RemoteAuthenticationProvider authenticationProvider;
+
+    public SecurityConfig(RemoteAuthenticationProvider authenticationProvider) {
+        this.authenticationProvider = authenticationProvider;
+    }
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
         http
+            .authenticationProvider(authenticationProvider)
             .authorizeHttpRequests(auth -> auth
                 // Allow static resources and login page without authentication
                 .requestMatchers(
-                    "/login", "/login/**",
+                    "/login", "/login/**", "/register", "/register/**",
                     "/css/**", "/js/**", "/images/**",
                     "/webjars/**", "/favicon.ico",
                     "/error"

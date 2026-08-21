@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Register — EDP Portal</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Nunito', sans-serif; min-height: 100vh; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #1a1f36 0%, #2d3561 50%, #1a1f36 100%); position: relative; overflow: hidden; }
+        body::before, body::after { content: ''; position: absolute; border-radius: 50%; opacity: 0.08; animation: float 8s ease-in-out infinite; }
+        body::before { width: 500px; height: 500px; background: #4e73df; top: -100px; left: -100px; }
+        body::after { width: 400px; height: 400px; background: #36b9cc; bottom: -80px; right: -80px; animation-delay: -4s; }
+        @keyframes float { 0%, 100% { transform: translateY(0) scale(1); } 50% { transform: translateY(20px) scale(1.05); } }
+        .login-card { position: relative; z-index: 10; background: rgba(255,255,255,0.97); border-radius: 24px; padding: 48px 44px; width: 100%; max-width: 420px; box-shadow: 0 30px 80px rgba(0,0,0,0.4); animation: slideUp 0.5s ease; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        .login-logo { text-align: center; margin-bottom: 32px; }
+        .login-logo-icon { width: 68px; height: 68px; background: linear-gradient(135deg, #4e73df, #36b9cc); border-radius: 18px; display: inline-flex; align-items: center; justify-content: center; font-size: 28px; color: white; box-shadow: 0 8px 24px rgba(78,115,223,0.4); margin-bottom: 14px; }
+        .login-logo h1 { font-size: 22px; font-weight: 900; color: #1a1f36; margin-bottom: 4px; }
+        .login-logo p { font-size: 13px; color: #858796; font-weight: 600; }
+        .alert { padding: 11px 14px; border-radius: 10px; font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 8px; margin-bottom: 18px; }
+        .alert-error { background: #fff0f0; border: 1px solid #f5c6cb; color: #721c24; }
+        .alert-success { background: #d4edda; border: 1px solid #c3e6cb; color: #155724; }
+        .form-group { margin-bottom: 20px; }
+        .form-label { display: block; font-size: 12px; font-weight: 800; color: #5a5c69; text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 7px; }
+        .input-wrap { position: relative; }
+        .input-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #b7b9cc; font-size: 15px; pointer-events: none; }
+        .form-control { width: 100%; padding: 12px 42px; border: 2px solid #e3e6f0; border-radius: 10px; font-size: 14px; font-weight: 600; font-family: 'Nunito', sans-serif; color: #1a1f36; background: white; transition: border-color 0.2s, box-shadow 0.2s; outline: none; }
+        .form-control:focus { border-color: #4e73df; box-shadow: 0 0 0 3px rgba(78,115,223,0.15); }
+        .toggle-pw { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #b7b9cc; cursor: pointer; font-size: 15px; transition: color 0.2s; }
+        .toggle-pw:hover { color: #4e73df; }
+        .btn-login { width: 100%; padding: 13px; background: linear-gradient(135deg, #4e73df, #36b9cc); border: none; border-radius: 10px; color: white; font-size: 15px; font-weight: 800; font-family: 'Nunito', sans-serif; cursor: pointer; letter-spacing: 0.3px; box-shadow: 0 4px 16px rgba(78,115,223,0.35); transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn-login:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(78,115,223,0.45); }
+        .btn-login:active { transform: translateY(0); }
+        .login-footer { text-align: center; margin-top: 24px; font-size: 12px; color: #b7b9cc; font-weight: 600; }
+        .login-footer a { color: #4e73df; text-decoration: none; }
+        .login-footer a:hover { text-decoration: underline; }
+        @media (max-width: 480px) { .login-card { padding: 36px 24px; margin: 16px; } }
+    </style>
+</head>
+<body>
+<div class="login-card">
+    <div class="login-logo">
+        <div class="login-logo-icon"><i class="fas fa-building-columns"></i></div>
+        <h1>EDP Portal</h1>
+        <p>Create your enterprise account</p>
+    </div>
+
+    <div class="alert alert-error" th:if="${errorMsg}">
+        <i class="fas fa-exclamation-circle"></i><span th:text="${errorMsg}"></span>
+    </div>
+    <div class="alert alert-success" th:if="${successMsg}">
+        <i class="fas fa-check-circle"></i><span th:text="${successMsg}"></span>
+    </div>
+
+    <form th:action="@{/register}" method="post">
+        <div class="form-group">
+            <label class="form-label" for="email">Email</label>
+            <div class="input-wrap">
+                <i class="fas fa-envelope input-icon"></i>
+                <input class="form-control" id="email" name="email" type="email" placeholder="Enter your email" autocomplete="email" required autofocus/>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="form-label" for="username">Username</label>
+            <div class="input-wrap">
+                <i class="fas fa-user input-icon"></i>
+                <input class="form-control" id="username" name="username" type="text" placeholder="Choose a username" autocomplete="username" required/>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="form-label" for="password">Password</label>
+            <div class="input-wrap">
+                <i class="fas fa-lock input-icon"></i>
+                <input class="form-control" id="password" name="password" type="password" minlength="8" placeholder="At least 8 characters" autocomplete="new-password" required/>
+                <button type="button" class="toggle-pw" id="togglePw" title="Show/hide password" aria-label="Show or hide password"><i class="fas fa-eye" id="toggleIcon"></i></button>
+            </div>
+        </div>
+        <button type="submit" class="btn-login"><i class="fas fa-user-plus"></i> Create Account</button>
+    </form>
+
+    <div class="login-footer"><a th:href="@{/login}">Already have an account? Sign in</a></div>
+    <div class="login-footer">&copy; 2025 EDP Portal &mdash; All rights reserved</div>
+</div>
+<script>
+    document.getElementById('togglePw').addEventListener('click', function () {
+        var pw = document.getElementById('password');
+        var icon = document.getElementById('toggleIcon');
+        if (pw.type === 'password') { pw.type = 'text'; icon.className = 'fas fa-eye-slash'; }
+        else { pw.type = 'password'; icon.className = 'fas fa-eye'; }
+    });
+</script>
+</body>
+</html>

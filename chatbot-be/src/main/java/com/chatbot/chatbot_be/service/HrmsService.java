@@ -36,6 +36,8 @@ public interface HrmsService {
     List<Map<String, Object>> performanceList();
     List<Map<String, Object>> getAllDepartments();
     List<Map<String, Object>> getAllUsers();
+    Map<String, Object> authenticateUser(String username, String password);
+    int registerUser(String email, String username, String password);
     List<Map<String, Object>> searchLeaveApplications(int empNo, String fromDate, String toDate);
 
     // ── Graph data ────────────────────────────────────────────────────────────

@@ -4,6 +4,7 @@ import com.chatbot.chatbot_be.repository.HrmsRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,6 +17,8 @@ public class HrmsServiceImpl implements HrmsService {
 
     @Autowired
     private HrmsRepository repo;
+
+    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     // ── Counts ────────────────────────────────────────────────────────────────
     @Override public int countActiveEmployees()    { return repo.countActiveEmployees(); }
@@ -48,6 +51,34 @@ public class HrmsServiceImpl implements HrmsService {
     @Override public List<Map<String, Object>> performanceList()   { return repo.performanceList(); }
     @Override public List<Map<String, Object>> getAllDepartments() { return repo.getAllDepartments(); }
     @Override public List<Map<String, Object>> getAllUsers()        { return repo.getAllUsers(); }
+
+    @Override
+    public Map<String, Object> authenticateUser(String username, String password) {
+        Map<String, Object> user = repo.findUserForAuthentication(username);
+        if (user.isEmpty() || !Boolean.TRUE.equals(user.get("is_active"))) {
+            return Map.of();
+        }
+
+        String storedPassword = String.valueOf(user.get("password_value"));
+        if (!passwordEncoder.matches(password, storedPassword)) {
+            return Map.of();
+        }
+
+        user.remove("password_value");
+        return user;
+    }
+
+    @Override
+    public int registerUser(String email, String username, String password) {
+        if (email == null || email.isBlank() || username == null || username.isBlank()
+                || password == null || password.length() < 8) {
+            return 0;
+        }
+        if (repo.userExists(email.trim(), username.trim())) {
+            return 0;
+        }
+        return repo.insertUser(email.trim(), username.trim(), passwordEncoder.encode(password));
+    }
 
     @Override
     public List<Map<String, Object>> searchLeaveApplications(int empNo, String fromDate, String toDate) {
