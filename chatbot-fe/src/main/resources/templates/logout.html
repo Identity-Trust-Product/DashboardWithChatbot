@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Logout - EDP Portal</title>
+</head>
+<body>
+<script>
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('identity_code');
+    localStorage.removeItem('token_type');
+    localStorage.removeItem('client_id');
+    localStorage.removeItem('username');
+    window.location.href = '/';
+</script>
+</body>
+</html>

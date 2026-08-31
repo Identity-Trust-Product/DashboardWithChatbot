@@ -155,7 +155,7 @@ public class DashboardController {
     //
     //  todo + favorites: stored in user config
     // =========================================================================
-    @GetMapping("/")
+    @GetMapping("/dashboard")
     public String getEmployeeDashboardData(Model model) throws Exception {
 
         List<Map<String, Object>> metrics = new ArrayList<>();

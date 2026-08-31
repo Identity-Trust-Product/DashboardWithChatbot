@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Signing In - EDP Portal</title>
+    <style>
+        body {
+            min-height: 100vh;
+            margin: 0;
+            display: grid;
+            place-items: center;
+            font-family: Arial, sans-serif;
+            background: #f4f7fb;
+            color: #1f2937;
+        }
+        .panel {
+            width: min(420px, calc(100vw - 32px));
+            padding: 30px;
+            border: 1px solid #d9e2ef;
+            border-radius: 8px;
+            background: #fff;
+            text-align: center;
+        }
+        h1 { margin: 0 0 10px; font-size: 22px; }
+        p { margin: 0; color: #667085; }
+        .error { color: #8a1f1f; font-weight: 700; }
+    </style>
+</head>
+<body>
+<main class="panel">
+    <h1 th:if="${errorMsg == null}">Signing you in</h1>
+    <p th:if="${errorMsg == null}">Taking you to the dashboard.</p>
+
+    <h1 class="error" th:if="${errorMsg != null}">Login callback failed</h1>
+    <p class="error" th:if="${errorMsg != null}" th:text="${errorMsg}"></p>
+</main>
+
+<script th:inline="javascript">
+    const accessToken = /*[[${accessToken}]]*/ null;
+    const code = /*[[${code}]]*/ null;
+    const tokenType = /*[[${tokenType}]]*/ null;
+    const clientId = /*[[${clientId}]]*/ null;
+    const username = /*[[${username}]]*/ null;
+    const errorMsg = /*[[${errorMsg}]]*/ null;
+
+    if (accessToken) {
+        localStorage.setItem('access_token', accessToken);
+    }
+    if (code) {
+        localStorage.setItem('identity_code', code);
+    }
+    if (tokenType) {
+        localStorage.setItem('token_type', tokenType);
+    }
+    if (clientId) {
+        localStorage.setItem('client_id', clientId);
+    }
+    if (username) {
+        localStorage.setItem('username', username);
+    }
+    if (!errorMsg && (accessToken || code)) {
+        window.location.href = '/dashboard';
+    }
+</script>
+</body>
+</html>

@@ -24,6 +24,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 // Allow static resources and login page without authentication
                 .requestMatchers(
+                    "/", "/callback", "/callback/**", "/logout", "/logout/**",
                     "/login", "/login/**", "/register", "/register/**",
                     "/css/**", "/js/**", "/images/**",
                     "/webjars/**", "/favicon.ico",
@@ -35,13 +36,13 @@ public class SecurityConfig {
             .formLogin(form -> form
                 .loginPage("/login")              // your custom login page GET /login
                 .loginProcessingUrl("/login")     // Spring handles POST /login
-                .defaultSuccessUrl("/", true)     // redirect to dashboard after login
+                .defaultSuccessUrl("/dashboard", true)     // redirect to dashboard after login
                 .failureUrl("/login?error=true")  // back to login on wrong password
                 .permitAll()
             )
             .logout(logout -> logout
-                .logoutUrl("/logout")
-                .logoutSuccessUrl("/login?logout=true")
+                .logoutUrl("/perform-logout")
+                .logoutSuccessUrl("/logout")
                 .invalidateHttpSession(true)
                 .clearAuthentication(true)
                 .permitAll()
