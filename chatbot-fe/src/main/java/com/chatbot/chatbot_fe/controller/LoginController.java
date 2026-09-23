@@ -108,6 +108,7 @@ public class LoginController {
         model.addAttribute("tokenType", resolvedTokenType);
         model.addAttribute("clientId", callbackClientId);
         model.addAttribute("username", resolvedUsername);
+        model.addAttribute("identityBaseUrl", identityBaseUrl);
         return "callback";
     }
 

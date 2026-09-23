@@ -43,6 +43,23 @@
     const clientId = /*[[${clientId}]]*/ null;
     const username = /*[[${username}]]*/ null;
     const errorMsg = /*[[${errorMsg}]]*/ null;
+    const identityBaseUrl = /*[[${identityBaseUrl}]]*/ null;
+
+    function decodeJwtPayload(token) {
+        try {
+            const payload = token.split('.')[1];
+            const normalized = payload.replace(/-/g, '+').replace(/_/g, '/');
+            const padded = normalized + '='.repeat((4 - normalized.length % 4) % 4);
+            return JSON.parse(decodeURIComponent(escape(window.atob(padded))));
+        } catch (error) {
+            return null;
+        }
+    }
+
+    function hasRealmRole(tokenPayload, role) {
+        const roles = tokenPayload?.realm_access?.roles || [];
+        return Array.isArray(roles) && roles.includes(role);
+    }
 
     if (accessToken) {
         localStorage.setItem('access_token', accessToken);
@@ -59,7 +76,19 @@
     if (username) {
         localStorage.setItem('username', username);
     }
-    if (!errorMsg && (accessToken || code)) {
+    if (!errorMsg && accessToken) {
+        const tokenPayload = decodeJwtPayload(accessToken);
+        if (identityBaseUrl && hasRealmRole(tokenPayload, 'APPLICATION_SUPER_ADMIN')) {
+            const adminUrl = new URL('/organization/dashboard', identityBaseUrl);
+            adminUrl.searchParams.set('hosted_admin_token', accessToken);
+            if (clientId) {
+                adminUrl.searchParams.set('client_id', clientId);
+            }
+            window.location.href = adminUrl.toString();
+        } else {
+            window.location.href = '/dashboard';
+        }
+    } else if (!errorMsg && code) {
         window.location.href = '/dashboard';
     }
 </script>
