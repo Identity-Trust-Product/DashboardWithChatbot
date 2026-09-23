@@ -291,6 +291,12 @@ public class HrmsController {
         return ResponseEntity.ok(result > 0 ? "Favorite removed" : "Remove failed");
     }
 
+    @PostMapping("/identity-os/migrate-users")
+    public ResponseEntity<Map<String, Object>> migrateUsersToIdentityOs() {
+        log.info("POST /api/identity-os/migrate-users");
+        return ResponseEntity.ok(svc.migrateUsersToIdentityOs());
+    }
+
     // =========================================================================
     //  DYNAMIC QUERY BUILDER
     // =========================================================================

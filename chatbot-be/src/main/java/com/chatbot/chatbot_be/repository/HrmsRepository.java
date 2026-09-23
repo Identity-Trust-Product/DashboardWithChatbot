@@ -338,6 +338,14 @@ public class HrmsRepository {
             "ORDER BY u.username");
     }
 
+    public List<Map<String, Object>> getUsersForIdentityOsMigration() {
+        return jdbc.queryForList(
+            "SELECT u.id AS external_user_id, u.username, u.email, r.name AS role, " +
+            "u.is_active, u.created_at, u.updated_at " +
+            "FROM hrms.users u LEFT JOIN hrms.roles r ON u.role_id = r.id " +
+            "ORDER BY u.username");
+    }
+
     public Map<String, Object> findUserForAuthentication(String username) {
         return jdbc.query(
             "SELECT u.username, u.is_active, u.hashed_password AS password_value, " +

@@ -1,12 +1,17 @@
 package com.chatbot.chatbot_be.service;
 
 import com.chatbot.chatbot_be.repository.HrmsRepository;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.MediaType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClient;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -19,6 +24,21 @@ public class HrmsServiceImpl implements HrmsService {
     private HrmsRepository repo;
 
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+
+    @Value("${identity.os.migration-url:http://localhost:8081/api/v1/onboarding/identity-users/migrate}")
+    private String identityOsMigrationUrl;
+
+    @Value("${identity.os.application-id:app_b713e8eeab81}")
+    private String identityOsApplicationId;
+
+    @Value("${identity.os.default-temporary-password:Temp@123}")
+    private String identityOsDefaultTemporaryPassword;
+
+    @Value("${identity.os.temporary-password-required:false}")
+    private boolean identityOsTemporaryPasswordRequired;
+
+    @Value("${identity.os.send-password-setup-email:true}")
+    private boolean identityOsSendPasswordSetupEmail;
 
     // ── Counts ────────────────────────────────────────────────────────────────
     @Override public int countActiveEmployees()    { return repo.countActiveEmployees(); }
@@ -53,6 +73,47 @@ public class HrmsServiceImpl implements HrmsService {
     @Override public List<Map<String, Object>> getAllUsers()        { return repo.getAllUsers(); }
 
     @Override
+    public Map<String, Object> migrateUsersToIdentityOs() {
+        List<Map<String, Object>> users = repo.getUsersForIdentityOsMigration();
+        List<Map<String, Object>> migrationUsers = new ArrayList<>();
+        for (Map<String, Object> user : users) {
+            String username = str(user.get("username"));
+            if (username.isBlank()) {
+                continue;
+            }
+            Map<String, Object> migrationUser = new LinkedHashMap<>();
+            migrationUser.put("externalUserId", str(user.get("external_user_id")));
+            migrationUser.put("username", username);
+            migrationUser.put("email", str(user.get("email")));
+            migrationUser.put("role", identityOsRole(str(user.get("role"))));
+            migrationUser.put("status", Boolean.TRUE.equals(user.get("is_active")) ? "ACTIVE" : "INACTIVE");
+            migrationUser.put("attributes", Map.of(
+                    "legacy_role", str(user.get("role")),
+                    "legacy_created_at", str(user.get("created_at")),
+                    "legacy_updated_at", str(user.get("updated_at"))));
+            migrationUsers.add(migrationUser);
+        }
+
+        Map<String, Object> payload = new LinkedHashMap<>();
+        payload.put("applicationId", identityOsApplicationId);
+        payload.put("defaultTemporaryPassword", identityOsDefaultTemporaryPassword);
+        payload.put("temporaryPasswordRequired", identityOsTemporaryPasswordRequired);
+        payload.put("sendPasswordSetupEmail", identityOsSendPasswordSetupEmail);
+        payload.put("createdBy", "DashboardWithChatbot");
+        payload.put("fileName", "hrms.users");
+        payload.put("users", migrationUsers);
+
+        log.info("Migrating {} DashboardWithChatbot users to Identity OS application {}", migrationUsers.size(), identityOsApplicationId);
+        return RestClient.create()
+                .post()
+                .uri(identityOsMigrationUrl)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(payload)
+                .retrieve()
+                .body(Map.class);
+    }
+
+    @Override
     public Map<String, Object> authenticateUser(String username, String password) {
         Map<String, Object> user = repo.findUserForAuthentication(username);
         if (user.isEmpty() || !Boolean.TRUE.equals(user.get("is_active"))) {
@@ -78,6 +139,16 @@ public class HrmsServiceImpl implements HrmsService {
             return 0;
         }
         return repo.insertUser(email.trim(), username.trim(), passwordEncoder.encode(password));
+    }
+
+    private String identityOsRole(String legacyRole) {
+        return "admin".equalsIgnoreCase(legacyRole) || "super_admin".equalsIgnoreCase(legacyRole)
+                ? "APPLICATION_SUPER_ADMIN"
+                : "APPLICATION_USER";
+    }
+
+    private String str(Object value) {
+        return value == null ? "" : String.valueOf(value).trim();
     }
 
     @Override
