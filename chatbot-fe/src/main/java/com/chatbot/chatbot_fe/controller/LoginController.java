@@ -35,6 +35,9 @@ public class LoginController {
     @Value("${identity.os.register-path}")
     private String registerPath;
 
+    @Value("${identity.os.trust-score-path}")
+    private String trustScorePath;
+
     @GetMapping("/")
     public String welcomePage(Model model) {
         addIdentityModel(model);
@@ -53,6 +56,28 @@ public class LoginController {
     public String registerPage(Model model) {
         return "redirect:" + buildIdentityUrl(registerPath);
     }
+
+    @GetMapping("/identity/trust-score")
+    public String trustScorePage(HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
+        String sessionUsername = session == null ? null : (String) session.getAttribute("username");
+        String sessionClientId = session == null ? null : (String) session.getAttribute("client_id");
+        String username = firstNonBlank(sessionUsername, SecurityContextHolder.getContext().getAuthentication() == null
+                ? null
+                : SecurityContextHolder.getContext().getAuthentication().getName());
+        String resolvedClientId = firstNonBlank(sessionClientId, clientId);
+        String returnUrl = firstNonBlank(request.getHeader("Referer"), buildClientUrl(request, "/"));
+
+        return "redirect:" + UriComponentsBuilder
+                .fromUriString(identityBaseUrl)
+                .path(trustScorePath)
+                .queryParam("client_id", resolvedClientId)
+                .queryParam("username", username)
+                .queryParam("return_url", returnUrl)
+                .build()
+                .toUriString();
+    }
+
 
     @GetMapping("/callback")
     public String callback(
@@ -128,6 +153,7 @@ public class LoginController {
         model.addAttribute("redirectUri", redirectUri);
         model.addAttribute("loginPath", loginPath);
         model.addAttribute("registerPath", registerPath);
+        model.addAttribute("trustScorePath", trustScorePath);
         model.addAttribute("identityLoginUrl", buildIdentityUrl(loginPath));
         model.addAttribute("identityRegisterUrl", buildIdentityUrl(registerPath));
     }
@@ -148,6 +174,17 @@ public class LoginController {
                 .path(path)
                 .queryParam("client_id", clientId)
                 .queryParam("redirect_uri", redirectUri)
+                .build()
+                .toUriString();
+    }
+
+    private String buildClientUrl(HttpServletRequest request, String path) {
+        return UriComponentsBuilder
+                .newInstance()
+                .scheme(request.getScheme())
+                .host(request.getServerName())
+                .port(request.getServerPort())
+                .path(path)
                 .build()
                 .toUriString();
     }
